@@ -1,31 +1,31 @@
 {
-    "name": "nanomed_4life",
-    "description": "",
+    "name": "nanoMedForLife",
+    "description": "A library for unified catheter steering control",
+    "version": "0.1.0",
     "dependencies": {
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "nanoMedForLife": "github:kummermi/nanomedforlife#c80a5c574f0467ffc7f10bbf5e3df50736cc1b41"
+        "magnetisches Spielfeld mit neopixel": "github:mint-n-pepper/magnetisches-spielfeld-mit-neopixel#7f01ae04e19cad51f88177ff0331d09651d14b6a",
+        "handlebit": "github:mint-n-pepper/handlebit_controller#v0.3.2",
+        "motor": "github:DFRobot/pxt-motor#2cdf17586556c5a532782aa436c516ae50f5f316"
     },
     "files": [
         "main.blocks",
         "main.ts",
-        "README.md",
-        "main.py"
+        "README.md"
     ],
     "testFiles": [
         "test.ts"
     ],
+    "public": true,
     "targetVersions": {
-        "branch": "v6.0.28",
-        "tag": "v6.0.28",
-        "commits": "https://github.com/microsoft/pxt-microbit/commits/9d308fa3c282191768670a6558e4df8af2d715cf",
         "target": "6.0.28",
-        "pxt": "9.0.19",
+        "pxt": "9.0.12",
         "targetId": "microbit"
     },
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "blocksprj"
+    "preferredEditor": "tsprj"
 }
