@@ -15,7 +15,7 @@ namespace nanoMedForLife {
     let wippen = 0
     let magnetabstand = 1
     let vorzeichen = 1
-    let modus = 0
+    let modus = 1
     let offset_magnet = 2
     let radioGroup = 1
     let lastReceivedNumber = 0
