@@ -1,7 +1,7 @@
 /*
 * Magnetic Actuation with Advancer Inclusion
 */
-//% weight=10 icon="\uf11b" color=#0a0a0a block="NanoMed for Life" 
+//% weight=10 icon="\uf11b" color=#0a0a0a block="nanomed4life" 
 namespace nanoMedForLife {
     let sideBeitrag = -1
     let hauptBeitrag = -1
@@ -12,13 +12,14 @@ namespace nanoMedForLife {
     let auslenkung = -1
     let winkel = -1
     let angle = -1
-    let wippen = 0
+    let wippen = 1
     let magnetabstand = 1
     let vorzeichen = 1
-    let modus = 1
+    let modus = 0
     let offset_magnet = 2
     let radioGroup = 1
     let lastReceivedNumber = 0
+    let speedFactor = 1
     let magnetJoystick = handlebit.Joystick.JOYSTICK_LEFT
     let advancerJoystick = handlebit.Joystick.JOYSTICK_RIGHT
    // let lastReceivedTime = control.millis()
@@ -259,11 +260,21 @@ namespace nanoMedForLife {
     //% weight=86 blockId=setAdvancerSpeed block="Advancer antreiben"
     export function setAdvancerSpeed() {
         if (dataReceived) {
-            motorPowerX = lastReceivedNumber
+            motorPowerX = speedFactor*lastReceivedNumber
             motor.MotorRun(motor.Motors.M1, motor.Dir.CW, motorPowerX)
             dataReceived = false
         } else {
             motor.motorStop(motor.Motors.M1)
         }
+    }
+    
+
+    /**
+     * Function setting the scaling factor for the advancer speed
+     *  @param speed is the desired scaling factor for the advancer speed
+     */
+    //% weight=86 blockId=setAdvancerSpeed block="Advancerspeed Faktor auf |%speed| setzen"
+    export function setAdvancerSpeedFactor(speed: number) {
+        speedFactor = speed
     }
 }
