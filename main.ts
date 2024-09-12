@@ -272,8 +272,9 @@ namespace nanoMedForLife {
     /**
      * Function setting the scaling factor for the advancer speed
      *  @param speed is the desired scaling factor for the advancer speed
+     * 
      */
-    //% weight=86 blockId=setAdvancerSpeed block="Advancerspeed Faktor auf |%speed| setzen"
+    //% weight=86 blockId=setAdvancerSpeedFactor block="Advancerspeed Faktor setzen auf |%speed|"
     export function setAdvancerSpeedFactor(speed: number) {
         speedFactor = speed
     }
