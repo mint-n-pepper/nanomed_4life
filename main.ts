@@ -250,6 +250,8 @@ namespace nanoMedForLife {
         let advancerSpeed = handlebit.getSensorValue(handlebit.Direction.DIR_X, advancerJoystick)
         if (advancerSpeed > 2 || advancerSpeed < -2) {
             radio.sendNumber(advancerSpeed)
+        } else {
+            radio.sendNumber(0)
         }
     }
 
