@@ -250,7 +250,9 @@ namespace nanoMedForLife {
         let advancerSpeed = handlebit.getSensorValue(handlebit.Direction.DIR_X, advancerJoystick)
         if (advancerSpeed > 2 || advancerSpeed < -2) {
             radio.sendNumber(advancerSpeed)
-        } 
+        } else {
+            radio.sendNumber(0)
+        }
     }
 
     /**
@@ -261,7 +263,11 @@ namespace nanoMedForLife {
     export function setAdvancerSpeed() {
         if (dataReceived) {
             motorPowerX = speedFactor*lastReceivedNumber
-            motor.MotorRun(motor.Motors.M1, motor.Dir.CW, motorPowerX)
+            if (motorPowerX != 0) {
+                motor.MotorRun(motor.Motors.M1, motor.Dir.CW, motorPowerX)
+            } else {
+                motor.motorStop(motor.Motors.M1)
+            }
             dataReceived = false
         } else {
             motor.motorStop(motor.Motors.M1)
