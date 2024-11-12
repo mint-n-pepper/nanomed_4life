@@ -38,25 +38,26 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Changing between wippen and homogeneous mode
+     * Funktion für den Baustein «Wenn Knopf ... geklickt» 
+     * Ändert die Ansteuerung einzelner Magnete zum Modus mit Gegenmagnet. Das Gegenmagnet erzeugt ein homogenes Magnetfeld wenn dazu die Dauermagnete «booster» ins Spielfeld eingesetzt sind. Dieser Modus ist speziell für die Challenge entwickelt.
      */
-    //% weight=86 blockId=switchWippen block="wechsle zwischen Gradienten- und Homogenfeld"
+    //% weight=86 blockId=switchWippen block="Modus wechseln"
     export function switchWippen() {
         wippen = 1 - wippen
     }
 
     /**
-     * Changing between oascillating and static steering mode
+     * Wenn in den Baustein «Wenn Knopf … geklickt» eingefügt schaltet der Modus Oszillieren ein / aus.
      */
-    //% weight=86 blockId=switchModus block="wechsle modus zwischen Oszillieren und statisch"
+    //% weight=86 blockId=switchModus block="Oszillation Ein/Aus"
     export function switchModus() {
         modus = 1 - modus
     }
 
     /**
-     * Set the variable magnetabstand to either 1 or 2
+     * Funktion für den Baustein «Wenn Knopf … geklickt» Diese Funktion verbreitert den Abstand der oszillierenden Magnete von 3 auf 5 Magnete wenn Oszillation Ein ist.
      */
-    //% weight=86 blockId=setMagnetabstand block="wechsle Magnetabstand 1 <-> 2"
+    //% weight=86 blockId=setMagnetabstand block="Oszillations-bereich"
     export function setMagnetabstand() {
         magnetabstand = magnetabstand === 1 ? 2 : 1
         // if (magnetabstand === 1) {
@@ -67,7 +68,7 @@ namespace nanoMedForLife {
     }
 
      /**
-     * Changing polarity of the coils
+     * Funktion für den Baustein «Wenn Knopf … geklickt». Diese Funktion wechselt per Knopfdruck die Nord/ Süd- Polarität der Magnetspulen. Damit kann das Magnet in die Gegenrichtung navigiert werden. Dies ist beim Labyrinth eine erforderliche Funktion.
      */
     //% weight=86 blockId=switchPolarity block="wechsle Polarität der Magnetspulen"
     export function switchPolarity() {
@@ -75,8 +76,8 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Setting the radio group to desired number
-     * @param frequency desired channel for radio transfer
+     * Dieser Baustein muss beim Sender und dem Empfänger “beim Start” gleich gesetzt sein. Dies definiert die Funkgruppen Nummer. Dieser Block ist für den Antrieb des Advancers nötig. Zusätzlich kann die Geschwindigkeit des Advancer Motors gesetzt werden.
+     * @param frequency gewünschter Funkkanal
      */
     //% weight=86 blockId=setRadioGroup block="setze den Funkkanal auf |%frequency|"
     export function setRadioGroup(frequency: number) {
@@ -96,20 +97,20 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Swap Joysticks back and forth
+     * Funktion für den Baustein «Wenn Knopf … geklickt». Diese Funktion tauscht Joystick links und rechts. Diese Funktion ist nicht mehr in der Liste, da sie kaum gebraucht wird.
      */
-    //% weight=86 blockId=swapJS block="Joystickfunktion tauschen"
-    export function swapJS() {
+    //% weight=86 blockId=swapJS block="Funktion der Joysticks tauschen"
+    function swapJS() {
         let temp = magnetJoystick
         magnetJoystick = advancerJoystick
         advancerJoystick = temp
     }
 
     // /**
-    // * Handle received number with a callback
-    // * @param callback function to handle the event
-    // */
-    // //% weight=86 blockId=receivingValues block="Advancerwert |%receivedNumber| lesen"
+     * Dieser Baustein empfängt “beim Start” Signale der gewählten Funknummer. Dieser Block ist für den Antrieb des Advancers nötig. Optional kann die Geschwindigkeit des Advancer Motors angepasst werden.
+     * @param callback function.
+     */
+    //% weight=86 blockId=receivingValues block="Funksignal |%receivedNumber| Empfänger"
     // export function onReceivedNumberHadler(callback: (receivedNumber: number) => void): void {
     //     radio.onReceivedNumber(function (receivedNumber: number){
     //         lastReceivedNumber = receivedNumber
@@ -211,10 +212,10 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Function setting magnetic field according to operation with or without wippen
+     * Sendet die Werte von “Auslenkung” (Magnetstärke) und “Winkel” (Richtung, bzw Magnetnummer) des Joysticks an das magnetische Spielfeld via Kabel.
      * @param magnetJoystick
      */
-    //% weight=86 blockId=setMagneticField block="Magnetfeld-Joystick auslesen und Werte an Spielfeld senden"
+    //% weight=86 blockId=setMagneticField block="Elektromagnete mit Joystick steuern"
     export function setMagneticField() {
         winkel = handlebit.getAngle(magnetJoystick)
         auslenkung = handlebit.getDeflection(magnetJoystick)
@@ -242,10 +243,10 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Function sending the advancer joystick deflection along X-axis to the advancer driver
+     * Sendet die Werte von der Auslenkung (Magnetstärke) und des Winkels (Je nach Richtung die entsprechende Magnetnummer) vom Joystick an den zweiten Micro:bit, welcher den Advancer antreibt. Dieser microBit muss die selbe Funknummer aufrufen um das Signal zu erhalten.
      * 
      */
-    //% weight=86 blockId=sendAdvancerCommand block="Advancer-Joystick auslesen und Werte an Advancer senden"
+    //% weight=86 blockId=sendAdvancerCommand block="Advancer- Joystick"
     export function sendAdvancerCommand() {
         let advancerSpeed = handlebit.getSensorValue(handlebit.Direction.DIR_X, advancerJoystick)
         if (advancerSpeed > 2 || advancerSpeed < -2) {
@@ -256,10 +257,10 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Function receiving the advancer joystick deflection along X-axis and sending it to the motor controller
+     * Dieser Block treibt den Motor des Advancers an, wenn dieser dem Empfänger hinzugefügt wird. Beachte, dass der "Empfänger" dieselbe Kanal Nummer wie der “Advancer Joystick" Sender aufweisen muss.
      * 
      */
-    //% weight=86 blockId=setAdvancerSpeed block="Advancer antreiben"
+    //% weight=86 blockId=setAdvancerSpeed block="Antrieb Advancer"
     export function setAdvancerSpeed() {
         if (dataReceived) {
             motorPowerX = speedFactor*lastReceivedNumber
@@ -276,12 +277,46 @@ namespace nanoMedForLife {
     
 
     /**
-     * Function setting the scaling factor for the advancer speed
-     *  @param speed is the desired scaling factor for the advancer speed
+     * Dieser Block kann in «Dauerhaft» oder «Schleife alle 50ms» eingefügt werden. Optionaler Faktor (Wert zwischen 0.1 - 20 eintragen) um die erwünschte Maximalgeschwindigkeit zu setzen. Default =1
+     *  @param speed
      * 
      */
-    //% weight=86 blockId=setAdvancerSpeedFactor block="Advancerspeed Faktor setzen auf |%speed|"
+    //% weight=86 blockId=setAdvancerSpeedFactor block="Advancer Geschwindigkeit |%speed|"
     export function setAdvancerSpeedFactor(speed: number) {
         speedFactor = speed
+    }
+
+     /**
+     * Setze die Leistung für einen Elektromagneten.
+     * Wenn der Index nicht zwischen 1 und 8 liegt wird kein Wert gesetzt und ein Ton ausgegeben.
+     * @param index des Elektromagneten
+     * @param leistung die der Elektromagnet abgeben soll
+     */
+    //% block="Setze Leistung für Elektromagnet $index auf $leistung"
+    //% leistung.min=-100 leistung.max=100
+    //% index.min=1 index.max=8
+    //% leistung.defl=0
+    //% index.defl=1
+    export function setMagnetPowerNanomed(
+        index?: number,
+        leistung?: number) {
+         MagneticNavigation.setMagnetPower(index, leistung)
+    }
+
+    /**
+     * Setze Leistung für alle Elektromagnete auf 0
+     */
+    //% block="Setze Leistung für alle Elektromagnete auf 0"
+    export function zeroAllMagnetsNanomed() {
+        MagneticNavigation.zeroAllMagnets()
+    }
+
+     /**
+     * Sende alle Leistungswerte zu den Motortreibern und aktiviere die Neopixel.
+     * Muss immer ausgeführt werden wenn neu gesetzte Werte angezeigt werden sollen.
+     */
+    //% block="Sende alle Leistungswerte zum Spielfeld"
+    export function writeAllNanomed() {
+        MagneticNavigation.writeAll()
     }
 }
