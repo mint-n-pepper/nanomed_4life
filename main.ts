@@ -1,5 +1,5 @@
 /*
-* Magnetic Actuation with Advancer Inclusion
+* Magnetsiches Spielfeld mit Handlebit Joystick und Advancer Steuerung
 */
 //% weight=10 icon="\uf11b" color=#0a0a0a block="nanomed4life" 
 namespace nanoMedForLife {
@@ -28,7 +28,7 @@ namespace nanoMedForLife {
 
 
     /**
-     * Initializing all processes requiring initialization
+     * Muss beim start zur Nutzung des Joysticks ausgeführt werden.
      */
     //% weight=86 blockId=initialize block="Initialisierung"
     export function init() {
@@ -107,7 +107,7 @@ namespace nanoMedForLife {
     }
 
     // /**
-     * Dieser Baustein empfängt “beim Start” Signale der gewählten Funknummer. Dieser Block ist für den Antrieb des Advancers nötig. Optional kann die Geschwindigkeit des Advancer Motors angepasst werden.
+     * Dieser Baustein empfängt beim Start Signale der gewählten Funknummer. Dieser Block ist für den Antrieb des Advancers nötig. Optional kann die Geschwindigkeit des Advancer Motors angepasst werden.
      * @param callback function.
      */
     //% weight=86 blockId=receivingValues block="Funksignal |%receivedNumber| Empfänger"
