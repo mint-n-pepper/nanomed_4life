@@ -106,7 +106,7 @@ namespace nanoMedForLife {
         advancerJoystick = temp
     }
 
-    // /**
+    /**
      * Dieser Baustein empfängt beim Start Signale der gewählten Funknummer. Dieser Block ist für den Antrieb des Advancers nötig. Optional kann die Geschwindigkeit des Advancer Motors angepasst werden.
      * @param callback function.
      */
