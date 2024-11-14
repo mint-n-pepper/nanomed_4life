@@ -1,7 +1,7 @@
 /*
 * Magnetsiches Spielfeld mit Handlebit Joystick und Advancer Steuerung
 */
-//% weight=10 icon="\uf11b" color=#0a0a0a block="nanomed4life" 
+//% weight=10 icon="\uf11b" color=#424242 block="nanomed4life" 
 namespace nanoMedForLife {
     let sideBeitrag = -1
     let hauptBeitrag = -1
@@ -87,7 +87,7 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Do something when a button is pushed down on the handlebit released again.
+     * Führt eine Aktion aus wenn auf den gewünschten Knopf gedrückt wird.
      * @param button the button that needs to be pressed
      * @param body code to run when event is raised
      */
