@@ -28,7 +28,7 @@ namespace nanoMedForLife {
 
 
     /**
-     * Muss beim start zur Nutzung des Joysticks ausgeführt werden.
+     * Muss beim start ausgeführt werden um den Joystick als Controller für die Elektromagnete zu benutzen.
      */
     //% weight=86 blockId=initialize block="Initialisierung"
     export function init() {
