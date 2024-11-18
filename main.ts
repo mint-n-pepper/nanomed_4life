@@ -285,38 +285,4 @@ namespace nanoMedForLife {
     export function setAdvancerSpeedFactor(speed: number) {
         speedFactor = speed
     }
-
-     /**
-     * Setze die Leistung für einen Elektromagneten.
-     * Wenn der Index nicht zwischen 1 und 8 liegt wird kein Wert gesetzt und ein Ton ausgegeben.
-     * @param index des Elektromagneten
-     * @param leistung die der Elektromagnet abgeben soll
-     */
-    //% block="Setze Leistung für Elektromagnet $index auf $leistung"
-    //% leistung.min=-100 leistung.max=100
-    //% index.min=1 index.max=8
-    //% leistung.defl=0
-    //% index.defl=1
-    export function setMagnetPowerNanomed(
-        index?: number,
-        leistung?: number) {
-         MagneticNavigation.setMagnetPower(index, leistung)
-    }
-
-    /**
-     * Setze Leistung für alle Elektromagnete auf 0
-     */
-    //% block="Setze Leistung für alle Elektromagnete auf 0"
-    export function zeroAllMagnetsNanomed() {
-        MagneticNavigation.zeroAllMagnets()
-    }
-
-     /**
-     * Sende alle Leistungswerte zu den Motortreibern und aktiviere die Neopixel.
-     * Muss immer ausgeführt werden wenn neu gesetzte Werte angezeigt werden sollen.
-     */
-    //% block="Sende alle Leistungswerte zum Spielfeld"
-    export function writeAllNanomed() {
-        MagneticNavigation.writeAll()
-    }
 }
