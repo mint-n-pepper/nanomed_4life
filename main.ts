@@ -35,11 +35,7 @@ namespace handlebit {
     let JoystickY2: number = -1;
     let handleCmd: string = "";
 
-    /**
-       * Dieser Block muss beim Start einmal ausgeführt werden um den Handlebit zu initialisieren
-      */
-    //% weight=100 blockId=initialize block="Handlebit Initialisierung"
-    export function initialize() {
+    function initialize() {
         serial.redirect(
             SerialPin.P12,
             SerialPin.P8,
@@ -489,12 +485,7 @@ namespace nanoMedForLife {
     let dataReceived = false
     let motorPowerX = 0
 
-
-    /**
-     * Muss beim start ausgeführt werden um den Joystick als Controller für die Elektromagnete zu benutzen.
-     */
-    //% weight=86 blockId=initialize block="Initialisierung"
-    export function init() {
+    function init() {
         handlebit.initialize()
         //radio.setGroup(radioGroup)
         // basic.showNumber(radioGroup)
@@ -749,3 +740,6 @@ namespace nanoMedForLife {
         speedFactor = speed
     }
 }
+
+console.log("Init HW...");
+nanoMedForLife.init();
