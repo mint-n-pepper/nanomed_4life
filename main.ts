@@ -239,7 +239,7 @@ namespace handlebit {
     
      /**
      * Berechnet den Winkelwert des gewünschten Joystick.
-     * Die Werte liegen im Bereich 0 bis 360 Grad.
+     * Die Werte liegen im Bereich 0 bis 360 Grad mit Definition am Einheitskreis.
      */
     //% blockId=getAngle block="Winkel Joystick |%joystick|"
     export function getAngle(joystick: Joystick) : number {
@@ -255,7 +255,7 @@ namespace handlebit {
             xWert=JoystickX2;
             yWert=JoystickY2;
         }
-            value = Math.round(Math.atan2(yWert,xWert)/Math.PI*180)+180;
+            value = Math.round(Math.atan2(yWert,xWert)/Math.PI*180);
     return value;
     }
 
