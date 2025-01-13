@@ -276,8 +276,7 @@ namespace handlebit {
             x = JoystickX2;
             y = JoystickY2;
         }
-        // adding 0.1 in case both x and y are 0
-        value = Math.round(Math.sqrt(x*x+y*y+0.1));
+        value = Math.round(Math.sqrt(x*x+y*y));
         if (value > 100)
         {
             value=100;
@@ -453,7 +452,6 @@ namespace MagneticNavigation {
         }
 
         levelIndicatorLEDs.show()
-
     }
 }
 
