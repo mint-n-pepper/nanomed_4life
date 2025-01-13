@@ -35,7 +35,7 @@ namespace handlebit {
     let JoystickY2: number = -1;
     let handleCmd: string = "";
 
-    function initialize() {
+    export function initialize() {
         serial.redirect(
             SerialPin.P12,
             SerialPin.P8,
@@ -485,7 +485,7 @@ namespace nanoMedForLife {
     let dataReceived = false
     let motorPowerX = 0
 
-    function init() {
+    export function init() {
         handlebit.initialize()
         //radio.setGroup(radioGroup)
         // basic.showNumber(radioGroup)
