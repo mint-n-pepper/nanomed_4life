@@ -6,8 +6,7 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "magnetisches Spielfeld mit neopixel": "github:mint-n-pepper/magnetisches-spielfeld-mit-neopixel#7f01ae04e19cad51f88177ff0331d09651d14b6a",
-        "handlebit": "github:mint-n-pepper/handlebit_controller#v0.3.2",
+        "neopixel": "github:microsoft/pxt-neopixel#v0.7.5",
         "motor": "github:DFRobot/pxt-motor#2cdf17586556c5a532782aa436c516ae50f5f316"
     },
     "files": [
