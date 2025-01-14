@@ -243,20 +243,30 @@ namespace handlebit {
      */
     //% blockId=getAngle block="Winkel Joystick |%joystick|"
     export function getAngle(joystick: Joystick) : number {
-        let value: number = 0;
-        let xWert=0;
-        let yWert=0;
+        let xWert = 0;
+        let yWert = 0;
+
         if (joystick == Joystick.JOYSTICK_LEFT)
         {
-            xWert=JoystickX1;
-            yWert=JoystickY1;
+            xWert = JoystickX1;
+            yWert = JoystickY1;
         }
         else {
-            xWert=JoystickX2;
-            yWert=JoystickY2;
+            xWert = JoystickX2;
+            yWert = JoystickY2;
         }
-            value = Math.round(Math.atan2(yWert,xWert)/Math.PI*180);
-    return value;
+
+        let value: number = 0;
+        value = Math.round(Math.atan2(yWert,xWert)/Math.PI*180);
+        // atan2() liefert Werte von 0° bis +180° für die ersten beiden Quadranten und dann
+        // -180° bis -0° für den dritten und vierten Quadranten. 
+        if (yWert < 0){
+            value = 360 + value;
+        }
+        // Dead-band wenn keine Auslenkung
+        if (getDeflection(joystick) < 3){ value = 0;}
+
+        return value;
     }
 
     /**
