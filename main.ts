@@ -316,7 +316,7 @@ namespace MagneticNavigation {
     let I2CMotorDriverAdd = 0x0d
     let electromagnetDirection = [[0, 0], [0, 0], [0, 0], [0, 0]]
     let electromagnetOutput = [[0, 0], [0, 0], [0, 0], [0, 0]]
-    let DriverAddress = [0x0A, 0x0B, 0x0C, 0x0D]
+    let DriverAddress = [ 0x0B, 0x0C, 0x0D, 0x0A]
     let levelIndicatorLEDs = neopixel.create(DigitalPin.P2, 64, NeoPixelMode.RGB)
 
 
