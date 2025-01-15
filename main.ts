@@ -627,54 +627,54 @@ namespace nanoMedForLife {
     }
 
     function getHauptMagnet(angle: number): number {
-    if (angle < 45) return 1
-    if (angle < 90) return 2
-    if (angle < 135) return 3
-    if (angle < 180) return 4
-    if (angle < 225) return 5
-    if (angle < 270) return 6
-    if (angle < 315) return 7
+    if (angle < 22.5 || angle > (360-22.5)) return 1
+    if (angle < (90 - 22.5)) return 2
+    if (angle < (135 - 22.5)) return 3
+    if (angle < (180 - 22.5)) return 4
+    if (angle < (225 - 22.5)) return 5
+    if (angle < (270 - 22.5)) return 6
+    if (angle < (315 - 22.5))) return 7
     return 8
     }
 
     function calculateContributions(angle: number, deflection: number) {
-        if (angle < 45) {
+        if ( angle < 22.5 || angle > (360-22.5) ) {
             sideKick = 2
             visAvis = 5
             visAvisSideKick = 6
             hauptBeitrag = deflection * Math.cos(2 * angle / 180 * Math.PI)
             sideBeitrag = deflection * Math.sin(2 * angle / 180 * Math.PI)
-        } else if (angle < 90) {
+        } else if (angle < (90 - 22.5)) {
             sideKick = 3
             visAvis = 6
             visAvisSideKick = 7
             hauptBeitrag = deflection * Math.cos(2 * (angle - 45) / 180 * Math.PI)
             sideBeitrag = deflection * Math.sin(2 * (angle - 45) / 180 * Math.PI)
-        } else if (angle < 135) {
+        } else if (angle < (135 - 22.5)) {
             sideKick = 4
             visAvis = 7
             visAvisSideKick = 8
             hauptBeitrag = deflection * Math.cos(2 * (angle - 90) / 180 * Math.PI)
             sideBeitrag = deflection * Math.sin(2 * (angle - 90) / 180 * Math.PI)
-        } else if (angle < 180) {
+        } else if (angle < (180 - 22.5)) {
             sideKick = 5
             visAvis = 8
             visAvisSideKick = 1
             hauptBeitrag = deflection * Math.cos(2 * (angle - 135) / 180 * Math.PI)
             sideBeitrag = deflection * Math.sin(2 * (angle - 135) / 180 * Math.PI)
-        } else if (angle < 225) {
+        } else if (angle < (225 - 22.5)) {
             sideKick = 6
             visAvis = 1
             visAvisSideKick = 2
             hauptBeitrag = deflection * Math.cos(2 * (angle - 180) / 180 * Math.PI)
             sideBeitrag = deflection * Math.sin(2 * (angle - 180) / 180 * Math.PI)
-        } else if (angle < 270) {
+        } else if  (angle < (270 - 22.5)) {
             sideKick = 7
             visAvis = 2
             visAvisSideKick = 3
             hauptBeitrag = deflection * Math.cos(2 * (angle - 225) / 180 * Math.PI)
             sideBeitrag = deflection * Math.sin(2 * (angle - 225) / 180 * Math.PI)
-        } else if (angle < 315) {
+        } else if (angle < (315 - 22.5)) {
             sideKick = 8
             visAvis = 3
             visAvisSideKick = 4
