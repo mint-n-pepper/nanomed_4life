@@ -687,7 +687,7 @@ namespace nanoMedForLife {
             hauptBeitrag = Math.abs(deflection * Math.cos(2 * Math.PI / 360 * (angle - 135)* 2))
             sideBeitrag = Math.abs(deflection * Math.sin(2 * Math.PI / 360 * (angle - 135) * 2))
 
-        } else if (angle < (180 - 22.5) && angle >= (90 + 45)) {
+        } else if (angle < (180 - 22.5) && angle >= 135) {
             sideKick = 5
             visAvis = 8
             visAvisSideKick = 1
@@ -715,7 +715,7 @@ namespace nanoMedForLife {
             hauptBeitrag = Math.abs(deflection * Math.cos(2 * Math.PI / 360 * (angle - 225)* 2))
             sideBeitrag = Math.abs(deflection * Math.sin(2 * Math.PI / 360 * (angle - 225) * 2))
 
-        }else if (angle < (180 + 22.5) && angle >= 180) {
+        }else if (angle < (270 - 22.5) && angle >= 225) {
             sideKick = 7
             visAvis = 2
             visAvisSideKick = 3
