@@ -633,7 +633,7 @@ namespace nanoMedForLife {
     if (angle < (180 - 22.5)) return 4
     if (angle < (225 - 22.5)) return 5
     if (angle < (270 - 22.5)) return 6
-    if (angle < (315 - 22.5))) return 7
+    if (angle < (315 - 22.5)) return 7
     return 8
     }
 
