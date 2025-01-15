@@ -638,55 +638,95 @@ namespace nanoMedForLife {
     }
 
     function calculateContributions(angle: number, deflection: number) {
-        if ( angle < 22.5 || angle > (360-22.5) ) {
+        if ( angle < 22.5 && angle >= 0) {
             sideKick = 2
             visAvis = 5
             visAvisSideKick = 6
-            hauptBeitrag = deflection * Math.cos(2 * angle / 180 * Math.PI)
-            sideBeitrag = deflection * Math.sin(2 * angle / 180 * Math.PI)
-        } else if (angle < (90 - 22.5)) {
+        } 
+        else if (angle > (360 - 22.5) && angle <= 360 ) {
+            sideKick = 8
+            visAvis = 5
+            visAvisSideKick = 4
+        }
+        else if (angle < 45 && angle >= 22.5) {
+            sideKick = 1
+            visAvis = 6
+            visAvisSideKick = 5
+        }
+        else if (angle < (45 + 22.5) && angle >= 45) {
             sideKick = 3
             visAvis = 6
             visAvisSideKick = 7
-            hauptBeitrag = deflection * Math.cos(2 * (angle - 45) / 180 * Math.PI)
-            sideBeitrag = deflection * Math.sin(2 * (angle - 45) / 180 * Math.PI)
-        } else if (angle < (135 - 22.5)) {
+
+        } else if (angle < 90 && angle >= (45 + 22.5)) {
+            sideKick = 2
+            visAvis = 7
+            visAvisSideKick = 6
+
+        } else if (angle < (90 + 22.5) && angle >= 90) {
             sideKick = 4
             visAvis = 7
             visAvisSideKick = 8
-            hauptBeitrag = deflection * Math.cos(2 * (angle - 90) / 180 * Math.PI)
-            sideBeitrag = deflection * Math.sin(2 * (angle - 90) / 180 * Math.PI)
-        } else if (angle < (180 - 22.5)) {
+
+        } else if (angle < (90 + 45 - 22.5) && angle >= (90 + 22.5)) {
+            sideKick = 3
+            visAvis = 8
+            visAvisSideKick = 7
+
+        } else if (angle < (180 - 22.5) && angle >= 135) {
             sideKick = 5
             visAvis = 8
             visAvisSideKick = 1
-            hauptBeitrag = deflection * Math.cos(2 * (angle - 135) / 180 * Math.PI)
-            sideBeitrag = deflection * Math.sin(2 * (angle - 135) / 180 * Math.PI)
-        } else if (angle < (225 - 22.5)) {
+
+        }else if (angle < 180  && angle >= (180 - 22.5)) {
+            sideKick = 4
+            visAvis = 1
+            visAvisSideKick = 8
+
+        }else if (angle < (180 + 22.5) && angle >= 180) {
             sideKick = 6
             visAvis = 1
             visAvisSideKick = 2
-            hauptBeitrag = deflection * Math.cos(2 * (angle - 180) / 180 * Math.PI)
-            sideBeitrag = deflection * Math.sin(2 * (angle - 180) / 180 * Math.PI)
-        } else if  (angle < (270 - 22.5)) {
+
+        }else if (angle < (180 + 45) && angle >= (180 + 22.5)) {
+            sideKick = 5
+            visAvis = 2
+            visAvisSideKick = 1
+
+        }else if (angle < (270 - 22.5) && angle >= 225) {
             sideKick = 7
             visAvis = 2
             visAvisSideKick = 3
-            hauptBeitrag = deflection * Math.cos(2 * (angle - 225) / 180 * Math.PI)
-            sideBeitrag = deflection * Math.sin(2 * (angle - 225) / 180 * Math.PI)
-        } else if (angle < (315 - 22.5)) {
+
+        }else if (angle < 270 && angle >= (270 - 22.5)) {
+            sideKick = 6
+            visAvis = 3
+            visAvisSideKick = 2
+
+        }else if (angle < (270 + 22.5) && angle >= 270) {
             sideKick = 8
             visAvis = 3
             visAvisSideKick = 4
-            hauptBeitrag = deflection * Math.cos(2 * (angle - 270) / 180 * Math.PI)
-            sideBeitrag = deflection * Math.sin(2 * (angle - 270) / 180 * Math.PI)
-        } else {
+
+        }else if (angle < 315 && angle >= (315 - 22.5)) {
+            sideKick = 7
+            visAvis = 4
+            visAvisSideKick = 3
+
+        }else if (angle <= (315 + 22.5) && angle >= 315) {
             sideKick = 1
             visAvis = 4
             visAvisSideKick = 5
-            hauptBeitrag = deflection * Math.cos(2 * (angle - 315) / 180 * Math.PI)
-            sideBeitrag = deflection * Math.sin(2 * (angle - 315) / 180 * Math.PI)
         }
+
+        let angle_offset = 0;
+        if (angle > (360 - 22.5) && angle <=360){
+            angle_offset = 0;
+        }else{
+            angle_offset = Math.floor((angle + 22.5) / 45) * 45
+        }
+            hauptBeitrag = Math.abs(deflection * Math.cos(2 * Math.PI / 360 * (angle - angle_offset) * 2))
+            sideBeitrag = Math.abs(deflection * Math.sin(2 * Math.PI / 360 * (angle - angle_offset) * 2))
     }
 
     /**
