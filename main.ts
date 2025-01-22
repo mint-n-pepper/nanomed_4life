@@ -319,7 +319,6 @@ namespace MagneticNavigation {
     let DriverAddress = [ 0x0B, 0x0C, 0x0D, 0x0A]
     let levelIndicatorLEDs = neopixel.create(DigitalPin.P2, 64, NeoPixelMode.RGB)
 
-
     function resetI2CDevices(){
         let reset_pin = DigitalPin.P1;
         pins.digitalWritePin(reset_pin, 1);
@@ -508,6 +507,10 @@ namespace nanoMedForLife {
     let dataReceived = false
     let motorPowerX = 0
 
+    let number_of_magnets = 8;
+    let angle_btwn_magnets = 360.0 / number_of_magnets;
+
+
     export function init() {
         handlebit.initialize()
         //radio.setGroup(radioGroup)
@@ -627,14 +630,16 @@ namespace nanoMedForLife {
     }
 
     function getHauptMagnet(angle: number): number {
-    if (angle < 22.5 || angle > (360-22.5)) return 1
-    if (angle < (90 - 22.5)) return 2
-    if (angle < (135 - 22.5)) return 3
-    if (angle < (180 - 22.5)) return 4
-    if (angle < (225 - 22.5)) return 5
-    if (angle < (270 - 22.5)) return 6
-    if (angle < (315 - 22.5)) return 7
-    return 8
+        control.assert(angle >= 0, "Angle must be positive!");
+
+        let angle_offset = angle + (angle_btwn_magnets / 2);
+        let index = Math.floor(angle_offset / angle_btwn_magnets)
+
+        /* Correction for roll-over */
+        index = index % number_of_magnets;
+
+        /* Correction because index starts at 1 (and not zero) */
+        return index + 1;
     }
 
     function calculateContributions(angle: number, deflection: number) {
