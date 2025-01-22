@@ -643,85 +643,24 @@ namespace nanoMedForLife {
     }
 
     function calculateContributions(angle: number, deflection: number) {
-        if ( angle < 22.5 && angle >= 0) {
-            sideKick = 2
-            visAvis = 5
-            visAvisSideKick = 6
-        } 
-        else if (angle > (360 - 22.5) && angle <= 360 ) {
-            sideKick = 8
-            visAvis = 5
-            visAvisSideKick = 4
+        let magnet_i = getHauptMagnet(angle);
+
+        /* are we in the uppper or lower segment away from the main magnet? */
+
+        control.assert(number_of_magnets % 2 == 0, "Number of magnets must be even!");
+        let distance_opposite_magnet = number_of_magnets / 2;
+
+        if (angle >= ((magnet_i - 1) * angle_btwn_magnets)){
+            /* upper segment */
+            sideKick = (magnet_i % number_of_magnets) + 1;
+            visAvis = ((magnet_i + distance_opposite_magnet - 1) % number_of_magnets) + 1; 
+            visAvisSideKick = (visAvis  % number_of_magnets) + 1;
         }
-        else if (angle < 45 && angle >= 22.5) {
-            sideKick = 1
-            visAvis = 6
-            visAvisSideKick = 5
-        }
-        else if (angle < (45 + 22.5) && angle >= 45) {
-            sideKick = 3
-            visAvis = 6
-            visAvisSideKick = 7
-
-        } else if (angle < 90 && angle >= (45 + 22.5)) {
-            sideKick = 2
-            visAvis = 7
-            visAvisSideKick = 6
-
-        } else if (angle < (90 + 22.5) && angle >= 90) {
-            sideKick = 4
-            visAvis = 7
-            visAvisSideKick = 8
-
-        } else if (angle < (90 + 45 - 22.5) && angle >= (90 + 22.5)) {
-            sideKick = 3
-            visAvis = 8
-            visAvisSideKick = 7
-
-        } else if (angle < (180 - 22.5) && angle >= 135) {
-            sideKick = 5
-            visAvis = 8
-            visAvisSideKick = 1
-
-        }else if (angle < 180  && angle >= (180 - 22.5)) {
-            sideKick = 4
-            visAvis = 1
-            visAvisSideKick = 8
-
-        }else if (angle < (180 + 22.5) && angle >= 180) {
-            sideKick = 6
-            visAvis = 1
-            visAvisSideKick = 2
-
-        }else if (angle < (180 + 45) && angle >= (180 + 22.5)) {
-            sideKick = 5
-            visAvis = 2
-            visAvisSideKick = 1
-
-        }else if (angle < (270 - 22.5) && angle >= 225) {
-            sideKick = 7
-            visAvis = 2
-            visAvisSideKick = 3
-
-        }else if (angle < 270 && angle >= (270 - 22.5)) {
-            sideKick = 6
-            visAvis = 3
-            visAvisSideKick = 2
-
-        }else if (angle < (270 + 22.5) && angle >= 270) {
-            sideKick = 8
-            visAvis = 3
-            visAvisSideKick = 4
-
-        }else if (angle < 315 && angle >= (315 - 22.5)) {
-            sideKick = 7
-            visAvis = 4
-            visAvisSideKick = 3
-
-        }else if (angle <= (315 + 22.5) && angle >= 315) {
-            sideKick = 1
-            visAvis = 4
-            visAvisSideKick = 5
+        else{
+            /* lower segment */
+            sideKick = ((magnet_i + (number_of_magnets - 1) - 1) % number_of_magnets) + 1;
+            visAvis = ((magnet_i + distance_opposite_magnet - 1) % number_of_magnets) + 1; 
+            visAvisSideKick = ((visAvis - 1 - 1) % number_of_magnets) + 1;
         }
 
         let angle_offset = 0;
