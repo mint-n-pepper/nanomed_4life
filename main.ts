@@ -764,6 +764,7 @@ namespace nanoMedForLife {
         const test_deflection = 100;
         for (let i = 0; i < test_angles.length; i++) {
             console.log("test for angle: " + test_angles[i]);
+            hauptmagnet = getHauptMagnet(test_angles[i]);
             calculateContributions(test_angles[i], test_deflection);
             // In one edge case, the alarm tone is hearable. 
             // This means, one index is out of boundary. Let's find it:
