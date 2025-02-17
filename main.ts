@@ -300,23 +300,23 @@ Magnetisches Spielfeld Interface für steuern der Elektromagnete nanomed4life
 */
 //% weight=10 icon="\uf192" color=#ff5733 block="Magnetisches Spielfeld" 
 namespace MagneticNavigation {
-    let MotorSpeedSet = 0x82
-    let PWMFrequenceSet = 0x84
-    let DirectionSet = 0xaa
-    let MotorSetA = 0xa1
-    let MotorSetB = 0xa5
-    let Nothing = 0x01
-    let EnableStepper = 0x1a
-    let UnenableStepper = 0x1b
-    let Stepernu = 0x1c
-    let BothClockWise = 0x0a
-    let BothAntiClockWise = 0x05
-    let M1CWM2ACW = 0x06
-    let M1ACWM2CW = 0x09
-    let I2CMotorDriverAdd = 0x0d
+    const MotorSpeedSet = 0x82
+    const PWMFrequenceSet = 0x84
+    const  DirectionSet = 0xaa
+    const MotorSetA = 0xa1
+    const MotorSetB = 0xa5
+    const Nothing = 0x01
+    const EnableStepper = 0x1a
+    const UnenableStepper = 0x1b
+    const Stepernu = 0x1c
+    const BothClockWise = 0x0a
+    const BothAntiClockWise = 0x05
+    const M1CWM2ACW = 0x06
+    const M1ACWM2CW = 0x09
+    const I2CMotorDriverAdd = 0x0d
     let electromagnetDirection = [[0, 0], [0, 0], [0, 0], [0, 0]]
     let electromagnetOutput = [[0, 0], [0, 0], [0, 0], [0, 0]]
-    let DriverAddress = [ 0x0B, 0x0C, 0x0D, 0x0A]
+    const DriverAddress = [ 0x0B, 0x0C, 0x0D, 0x0A]
     let levelIndicatorLEDs = neopixel.create(DigitalPin.P2, 64, NeoPixelMode.RGB)
 
     function resetI2CDevices(){
@@ -507,8 +507,8 @@ namespace nanoMedForLife {
     let dataReceived = false
     let motorPowerX = 0
 
-    let number_of_magnets = 8;
-    let angle_btwn_magnets = 360.0 / number_of_magnets;
+    const number_of_magnets = 8;
+    const angle_btwn_magnets = 360.0 / number_of_magnets;
 
 
     export function init() {
@@ -639,7 +639,10 @@ namespace nanoMedForLife {
         index = index % number_of_magnets;
 
         /* Correction because index starts at 1 (and not zero) */
-        return index + 1;
+        let index_result = index + 1;
+        control.assert(index_result >= 1 && index_result <= 8, "Hauptmagnet out of boundaries: " + index_result + "for angle :" + angle);
+
+        return index_result;
     }
 
     function calculateContributions(angle: number, deflection: number) {
