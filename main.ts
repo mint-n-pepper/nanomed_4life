@@ -504,7 +504,6 @@ namespace nanoMedForLife {
     let magnetJoystick = handlebit.Joystick.JOYSTICK_LEFT
     let advancerJoystick = handlebit.Joystick.JOYSTICK_RIGHT
    // let lastReceivedTime = control.millis()
-    let dataReceived = false
     let motorPowerX = 0
 
     const number_of_magnets = 8;
@@ -624,7 +623,6 @@ namespace nanoMedForLife {
 
         radio.onReceivedNumber(function (advancerSpeed: number) {
             lastReceivedNumber = advancerSpeed;
-            dataReceived = true;
             actualCallback(advancerSpeed);
         });
     }
@@ -731,14 +729,12 @@ namespace nanoMedForLife {
      */
     //% weight=86 blockId=setAdvancerSpeed block="Antrieb Advancer"
     export function setAdvancerSpeed() {
-        if (dataReceived) {
             motorPowerX = speedFactor*lastReceivedNumber
             if (motorPowerX != 0) {
                 motor.MotorRun(motor.Motors.M1, motor.Dir.CW, motorPowerX)
             } else {
                 motor.motorStop(motor.Motors.M1)
             }
-            dataReceived = false
         } else {
             motor.motorStop(motor.Motors.M1)
         }
