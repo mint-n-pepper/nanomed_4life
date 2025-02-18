@@ -720,11 +720,7 @@ namespace nanoMedForLife {
             } else {
                 motor.motorStop(motor.Motors.M1)
             }
-        } else {
-            motor.motorStop(motor.Motors.M1)
-        }
     }
-    
 
     /**
      * Dieser Block kann in «Dauerhaft» oder «Schleife alle 50ms» eingefügt werden.
