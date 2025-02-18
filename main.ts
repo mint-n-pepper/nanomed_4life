@@ -603,27 +603,12 @@ namespace nanoMedForLife {
      * @param optionsOrCallback Optional configuration object or callback function
      * @param callbackOrUndefined Optional callback function
      */
-    //% weight=86 blockId=receivingValues block="empfange Wert für |%advancerSpeed|"
-    export function onReceivedNumberHandler(
-        optionsOrCallback: number | ((radvancerSpeed: number) => void),
-        callbackOrUndefined?: (advancerSpeed: number) => void
+    //% weight=86 blockId=receivingValues block="empfange Wert für advancerSpeed"
+    export function onReceivedNumberHandler( callback: Action
     ): void {
-        let actualCallback: (advancerSpeed: number) => void;
-
-        if (typeof optionsOrCallback === 'function') {
-            actualCallback = optionsOrCallback;
-        } else if (typeof callbackOrUndefined === 'function') {
-            actualCallback = callbackOrUndefined;
-        } else {
-            // Fallback in case no valid callback is provided
-            actualCallback = function(advancerSpeed: number) {
-                console.log("Received number: " + advancerSpeed);
-            };
-        }
-
         radio.onReceivedNumber(function (advancerSpeed: number) {
             lastReceivedNumber = advancerSpeed;
-            actualCallback(advancerSpeed);
+            callback();
         });
     }
 
