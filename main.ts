@@ -663,7 +663,7 @@ namespace nanoMedForLife {
             /* lower segment */
             sideKick = ((magnet_i + (number_of_magnets - 1) - 1) % number_of_magnets) + 1;
             visAvis = ((magnet_i + distance_opposite_magnet - 1) % number_of_magnets) + 1; 
-            visAvisSideKick = ((visAvis - 1 - 1) % number_of_magnets) + 1;
+            visAvisSideKick = ((sideKick - 1 + distance_opposite_magnet) % number_of_magnets) + 1;
         }
 
         let angle_offset = 0;
@@ -763,7 +763,7 @@ namespace nanoMedForLife {
         //const test_angles = [0, 45, 90, 135, 180, 225, 270, 315, 360 ];
         const test_deflection = 100;
         for (let i = 0; i <= 360; i++) {
-            console.log("test for angle: " + i);
+            console.log("Run test for angle: " + i);
             hauptmagnet = getHauptMagnet(i);
             calculateContributions(i, test_deflection);
             // In one edge case, the alarm tone is hearable. 
@@ -772,7 +772,6 @@ namespace nanoMedForLife {
             control.assert(sideKick >= 1 && sideKick <= 8, "sideKick out of boundaries: " + sideKick );
             control.assert(visAvis >= 1 && visAvis <= 8, "visAvis out of boundaries: " + visAvis);
             control.assert(visAvisSideKick >= 1 && visAvisSideKick <= 8, "visAvisSideKick out of boundaries: " + visAvisSideKick);
-            console.log("OK")
             }
     }
 }
