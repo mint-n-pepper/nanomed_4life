@@ -760,12 +760,12 @@ namespace nanoMedForLife {
     let run_testcase = true;
     if(run_testcase){
         console.log("Test case is set active")
-        const test_angles = [0, 45, 90, 135, 180, 225, 270, 315, 360 ];
+        //const test_angles = [0, 45, 90, 135, 180, 225, 270, 315, 360 ];
         const test_deflection = 100;
-        for (let i = 0; i < test_angles.length; i++) {
-            console.log("test for angle: " + test_angles[i]);
-            hauptmagnet = getHauptMagnet(test_angles[i]);
-            calculateContributions(test_angles[i], test_deflection);
+        for (let i = 0; i <= 360; i++) {
+            console.log("test for angle: " + i);
+            hauptmagnet = getHauptMagnet(i);
+            calculateContributions(i, test_deflection);
             // In one edge case, the alarm tone is hearable. 
             // This means, one index is out of boundary. Let's find it:
             control.assert(hauptmagnet >= 1 && hauptmagnet <= 8,"Hauptmagnet out of boundaries: "+ hauptmagnet );
