@@ -300,25 +300,24 @@ Magnetisches Spielfeld Interface für steuern der Elektromagnete nanomed4life
 */
 //% weight=10 icon="\uf192" color=#ff5733 block="Magnetisches Spielfeld" 
 namespace MagneticNavigation {
-    let MotorSpeedSet = 0x82
-    let PWMFrequenceSet = 0x84
-    let DirectionSet = 0xaa
-    let MotorSetA = 0xa1
-    let MotorSetB = 0xa5
-    let Nothing = 0x01
-    let EnableStepper = 0x1a
-    let UnenableStepper = 0x1b
-    let Stepernu = 0x1c
-    let BothClockWise = 0x0a
-    let BothAntiClockWise = 0x05
-    let M1CWM2ACW = 0x06
-    let M1ACWM2CW = 0x09
-    let I2CMotorDriverAdd = 0x0d
+    const MotorSpeedSet = 0x82
+    const PWMFrequenceSet = 0x84
+    const  DirectionSet = 0xaa
+    const MotorSetA = 0xa1
+    const MotorSetB = 0xa5
+    const Nothing = 0x01
+    const EnableStepper = 0x1a
+    const UnenableStepper = 0x1b
+    const Stepernu = 0x1c
+    const BothClockWise = 0x0a
+    const BothAntiClockWise = 0x05
+    const M1CWM2ACW = 0x06
+    const M1ACWM2CW = 0x09
+    const I2CMotorDriverAdd = 0x0d
     let electromagnetDirection = [[0, 0], [0, 0], [0, 0], [0, 0]]
     let electromagnetOutput = [[0, 0], [0, 0], [0, 0], [0, 0]]
-    let DriverAddress = [ 0x0B, 0x0C, 0x0D, 0x0A]
+    const DriverAddress = [ 0x0B, 0x0C, 0x0D, 0x0A]
     let levelIndicatorLEDs = neopixel.create(DigitalPin.P2, 64, NeoPixelMode.RGB)
-
 
     function resetI2CDevices(){
         let reset_pin = DigitalPin.P1;
@@ -505,8 +504,11 @@ namespace nanoMedForLife {
     let magnetJoystick = handlebit.Joystick.JOYSTICK_LEFT
     let advancerJoystick = handlebit.Joystick.JOYSTICK_RIGHT
    // let lastReceivedTime = control.millis()
-    let dataReceived = false
     let motorPowerX = 0
+
+    const number_of_magnets = 8;
+    const angle_btwn_magnets = 360.0 / number_of_magnets;
+
 
     export function init() {
         handlebit.initialize()
@@ -601,122 +603,50 @@ namespace nanoMedForLife {
      * @param optionsOrCallback Optional configuration object or callback function
      * @param callbackOrUndefined Optional callback function
      */
-    //% weight=86 blockId=receivingValues block="empfange Wert für |%advancerSpeed|"
-    export function onReceivedNumberHandler(
-        optionsOrCallback: number | ((radvancerSpeed: number) => void),
-        callbackOrUndefined?: (advancerSpeed: number) => void
+    //% weight=86 blockId=receivingValues block="empfange Wert für advancerSpeed"
+    export function onReceivedNumberHandler( callback: Action
     ): void {
-        let actualCallback: (advancerSpeed: number) => void;
-
-        if (typeof optionsOrCallback === 'function') {
-            actualCallback = optionsOrCallback;
-        } else if (typeof callbackOrUndefined === 'function') {
-            actualCallback = callbackOrUndefined;
-        } else {
-            // Fallback in case no valid callback is provided
-            actualCallback = function(advancerSpeed: number) {
-                console.log("Received number: " + advancerSpeed);
-            };
-        }
-
         radio.onReceivedNumber(function (advancerSpeed: number) {
             lastReceivedNumber = advancerSpeed;
-            dataReceived = true;
-            actualCallback(advancerSpeed);
+            callback();
         });
     }
 
     function getHauptMagnet(angle: number): number {
-    if (angle < 22.5 || angle > (360-22.5)) return 1
-    if (angle < (90 - 22.5)) return 2
-    if (angle < (135 - 22.5)) return 3
-    if (angle < (180 - 22.5)) return 4
-    if (angle < (225 - 22.5)) return 5
-    if (angle < (270 - 22.5)) return 6
-    if (angle < (315 - 22.5)) return 7
-    return 8
+        control.assert(angle >= 0, "Angle must be positive!");
+
+        let angle_offset = angle + (angle_btwn_magnets / 2);
+        let index = Math.floor(angle_offset / angle_btwn_magnets)
+
+        /* Correction for roll-over */
+        index = index % number_of_magnets;
+
+        /* Correction because index starts at 1 (and not zero) */
+        let index_result = index + 1;
+        control.assert(index_result >= 1 && index_result <= 8, "Hauptmagnet out of boundaries: " + index_result + "for angle :" + angle);
+
+        return index_result;
     }
 
     function calculateContributions(angle: number, deflection: number) {
-        if ( angle < 22.5 && angle >= 0) {
-            sideKick = 2
-            visAvis = 5
-            visAvisSideKick = 6
-        } 
-        else if (angle > (360 - 22.5) && angle <= 360 ) {
-            sideKick = 8
-            visAvis = 5
-            visAvisSideKick = 4
+        let magnet_i = getHauptMagnet(angle);
+
+        /* are we in the uppper or lower segment away from the main magnet? */
+
+        control.assert(number_of_magnets % 2 == 0, "Number of magnets must be even!");
+        let distance_opposite_magnet = number_of_magnets / 2;
+
+        if (angle >= ((magnet_i - 1) * angle_btwn_magnets)){
+            /* upper segment */
+            sideKick = (magnet_i % number_of_magnets) + 1;
+            visAvis = ((magnet_i + distance_opposite_magnet - 1) % number_of_magnets) + 1; 
+            visAvisSideKick = (visAvis  % number_of_magnets) + 1;
         }
-        else if (angle < 45 && angle >= 22.5) {
-            sideKick = 1
-            visAvis = 6
-            visAvisSideKick = 5
-        }
-        else if (angle < (45 + 22.5) && angle >= 45) {
-            sideKick = 3
-            visAvis = 6
-            visAvisSideKick = 7
-
-        } else if (angle < 90 && angle >= (45 + 22.5)) {
-            sideKick = 2
-            visAvis = 7
-            visAvisSideKick = 6
-
-        } else if (angle < (90 + 22.5) && angle >= 90) {
-            sideKick = 4
-            visAvis = 7
-            visAvisSideKick = 8
-
-        } else if (angle < (90 + 45 - 22.5) && angle >= (90 + 22.5)) {
-            sideKick = 3
-            visAvis = 8
-            visAvisSideKick = 7
-
-        } else if (angle < (180 - 22.5) && angle >= 135) {
-            sideKick = 5
-            visAvis = 8
-            visAvisSideKick = 1
-
-        }else if (angle < 180  && angle >= (180 - 22.5)) {
-            sideKick = 4
-            visAvis = 1
-            visAvisSideKick = 8
-
-        }else if (angle < (180 + 22.5) && angle >= 180) {
-            sideKick = 6
-            visAvis = 1
-            visAvisSideKick = 2
-
-        }else if (angle < (180 + 45) && angle >= (180 + 22.5)) {
-            sideKick = 5
-            visAvis = 2
-            visAvisSideKick = 1
-
-        }else if (angle < (270 - 22.5) && angle >= 225) {
-            sideKick = 7
-            visAvis = 2
-            visAvisSideKick = 3
-
-        }else if (angle < 270 && angle >= (270 - 22.5)) {
-            sideKick = 6
-            visAvis = 3
-            visAvisSideKick = 2
-
-        }else if (angle < (270 + 22.5) && angle >= 270) {
-            sideKick = 8
-            visAvis = 3
-            visAvisSideKick = 4
-
-        }else if (angle < 315 && angle >= (315 - 22.5)) {
-            sideKick = 7
-            visAvis = 4
-            visAvisSideKick = 3
-
-        }else if (angle <= (315 + 22.5) && angle >= 315) {
-            sideKick = 1
-            visAvis = 4
-            visAvisSideKick = 5
+        else{
+            /* lower segment */
+            sideKick = ((magnet_i + (number_of_magnets - 1) - 1) % number_of_magnets) + 1;
+            visAvis = ((magnet_i + distance_opposite_magnet - 1) % number_of_magnets) + 1; 
+            visAvisSideKick = ((sideKick - 1 + distance_opposite_magnet) % number_of_magnets) + 1;
         }
 
         let angle_offset = 0;
@@ -784,19 +714,13 @@ namespace nanoMedForLife {
      */
     //% weight=86 blockId=setAdvancerSpeed block="Antrieb Advancer"
     export function setAdvancerSpeed() {
-        if (dataReceived) {
             motorPowerX = speedFactor*lastReceivedNumber
             if (motorPowerX != 0) {
                 motor.MotorRun(motor.Motors.M1, motor.Dir.CW, motorPowerX)
             } else {
                 motor.motorStop(motor.Motors.M1)
             }
-            dataReceived = false
-        } else {
-            motor.motorStop(motor.Motors.M1)
-        }
     }
-    
 
     /**
      * Dieser Block kann in «Dauerhaft» oder «Schleife alle 50ms» eingefügt werden.
@@ -808,7 +732,29 @@ namespace nanoMedForLife {
     export function setAdvancerSpeedFactor(speed: number) {
         speedFactor = speed
     }
+
+
+    let run_testcase = true;
+    if(run_testcase){
+        console.log("Test case is set active")
+        //const test_angles = [0, 45, 90, 135, 180, 225, 270, 315, 360 ];
+        const test_deflection = 100;
+        for (let i = 0; i <= 360; i++) {
+            console.log("Run test for angle: " + i);
+            hauptmagnet = getHauptMagnet(i);
+            calculateContributions(i, test_deflection);
+            // In one edge case, the alarm tone is hearable. 
+            // This means, one index is out of boundary. Let's find it:
+            control.assert(hauptmagnet >= 1 && hauptmagnet <= 8,"Hauptmagnet out of boundaries: "+ hauptmagnet );
+            control.assert(sideKick >= 1 && sideKick <= 8, "sideKick out of boundaries: " + sideKick );
+            control.assert(visAvis >= 1 && visAvis <= 8, "visAvis out of boundaries: " + visAvis);
+            control.assert(visAvisSideKick >= 1 && visAvisSideKick <= 8, "visAvisSideKick out of boundaries: " + visAvisSideKick);
+            }
+    }
 }
+
+
+
 
 console.log("Init HW...");
 nanoMedForLife.init();
