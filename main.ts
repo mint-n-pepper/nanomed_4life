@@ -365,15 +365,13 @@ namespace MagneticNavigation {
         // Restart service, log error, etc.
         zeroAllMagnets();
         levelIndicatorLEDs.clear();
-        control.inBackground(() => {
-            const timeoutColor = neopixel.rgb(255, 0, 255); // pink
-            while(!watchdog.get_running()){
-                levelIndicatorLEDs.showColor(timeoutColor);
-                basic.pause(250)
-                levelIndicatorLEDs.clear();
-                basic.pause(250)
-            }
-        });
+        const timeoutColor = neopixel.rgb(255, 0, 255); // pink
+        while(!watchdog.get_running()){
+            levelIndicatorLEDs.showColor(timeoutColor);
+            basic.pause(250)
+            levelIndicatorLEDs.clear();
+            basic.pause(250)
+        }
     });
 
     watchdog.start();
