@@ -300,7 +300,6 @@ Magnetisches Spielfeld Interface für steuern der Elektromagnete nanomed4life
 */
 //% weight=10 icon="\uf192" color=#ff5733 block="Magnetisches Spielfeld" 
 namespace MagneticNavigation {
-    const WatchdogTimeoutMS = 10000;
     const MotorSpeedSet = 0x82
     const PWMFrequenceSet = 0x84
     const  DirectionSet = 0xaa
@@ -323,11 +322,9 @@ namespace MagneticNavigation {
     class Watchdog {
         private timeout: number;
         private running: boolean = false;
-        private onTimeout: () => void;
 
-        constructor(timeout: number, onTimeout: () => void) {
+        constructor(timeout: number ) {
             this.timeout = timeout;
-            this.onTimeout = onTimeout;
         }
 
         start(): void {
@@ -351,29 +348,26 @@ namespace MagneticNavigation {
 
         private monitor(): void {
             control.inBackground(() => {
+                let startTime = input.runningTime();
                 basic.pause(this.timeout);
-                if (this.running) {
+                if (this.running && input.runningTime() - startTime >= this.timeout) {
+                    console.log("Watchdog timeout! Shutting down motors");
                     this.running = false;
-                    this.onTimeout();
+                    zeroAllMagnets();
+                    levelIndicatorLEDs.clear();
+                    const timeoutColor = neopixel.rgb(255, 0, 255); // pink
+                    while(!watchdog.get_running() && watchdog !== undefined){
+                        levelIndicatorLEDs.showColor(timeoutColor);
+                        basic.pause(250)
+                        levelIndicatorLEDs.clear();
+                        basic.pause(250)
+                    }
                 }
             });
         }
     }
 
-    export let watchdog = new Watchdog(WatchdogTimeoutMS, () => {
-        console.log("Watchdog timeout! Shutting down motors");
-        // Restart service, log error, etc.
-        zeroAllMagnets();
-        levelIndicatorLEDs.clear();
-        const timeoutColor = neopixel.rgb(255, 0, 255); // pink
-        while(!watchdog.get_running()){
-            levelIndicatorLEDs.showColor(timeoutColor);
-            basic.pause(250)
-            levelIndicatorLEDs.clear();
-            basic.pause(250)
-        }
-    });
-
+    export const watchdog = new Watchdog(5000); /* TODO: adjust timeout to 5min when done with testing */ 
     watchdog.start();
 
     function resetI2CDevices(){
@@ -387,7 +381,7 @@ namespace MagneticNavigation {
     /**
      * Sende Herzschlag an Watchdog Timer um Selbstabschaltung zu stoppen.
      */
-    //% block="Sende Herzschlag an Watchdog Timer um Selbstabschaltung zu stoppen."
+    //% block="Sende Herzschlag"
     export function sendHeartbeat() {
         console.log("Watchdog timer reset.");
         watchdog.reset();
