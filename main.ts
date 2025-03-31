@@ -328,12 +328,14 @@ namespace MagneticNavigation {
         }
 
         start(): void {
+            if (this.running) return;
             this.running = true;
             levelIndicatorLEDs.clear();
             this.monitor();
         }
 
         reset(): void {
+            if (!this.running) return; 
             this.running = false;
             this.start();
         }
