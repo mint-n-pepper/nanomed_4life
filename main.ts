@@ -360,7 +360,7 @@ namespace MagneticNavigation {
         }
     }
 
-    const watchdog = new Watchdog(WatchdogTimeoutMS, () => {
+    export let watchdog = new Watchdog(WatchdogTimeoutMS, () => {
         console.log("Watchdog timeout! Shutting down motors");
         // Restart service, log error, etc.
         zeroAllMagnets();
