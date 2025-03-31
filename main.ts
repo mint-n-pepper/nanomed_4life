@@ -300,6 +300,7 @@ Magnetisches Spielfeld Interface für steuern der Elektromagnete nanomed4life
 */
 //% weight=10 icon="\uf192" color=#ff5733 block="Magnetisches Spielfeld" 
 namespace MagneticNavigation {
+    const WatchdogTimeoutMS = 10000;
     const MotorSpeedSet = 0x82
     const PWMFrequenceSet = 0x84
     const  DirectionSet = 0xaa
@@ -319,12 +320,79 @@ namespace MagneticNavigation {
     const DriverAddress = [ 0x0B, 0x0C, 0x0D, 0x0A]
     let levelIndicatorLEDs = neopixel.create(DigitalPin.P2, 64, NeoPixelMode.RGB)
 
+    class Watchdog {
+        private timeout: number;
+        private running: boolean = false;
+        private onTimeout: () => void;
+
+        constructor(timeout: number, onTimeout: () => void) {
+            this.timeout = timeout;
+            this.onTimeout = onTimeout;
+        }
+
+        start(): void {
+            this.running = true;
+            levelIndicatorLEDs.clear();
+            this.monitor();
+        }
+
+        reset(): void {
+            this.running = false;
+            this.start();
+        }
+
+        stop(): void {
+            this.running = false;
+        }
+
+        get_running(): boolean {
+            return this.running;
+        }
+
+        private monitor(): void {
+            control.inBackground(() => {
+                basic.pause(this.timeout);
+                if (this.running) {
+                    this.running = false;
+                    this.onTimeout();
+                }
+            });
+        }
+    }
+
+    const watchdog = new Watchdog(WatchdogTimeoutMS, () => {
+        console.log("Watchdog timeout! Shutting down motors");
+        // Restart service, log error, etc.
+        zeroAllMagnets();
+        levelIndicatorLEDs.clear();
+        control.inBackground(() => {
+            const timeoutColor = neopixel.rgb(255, 0, 255); // pink
+            while(!watchdog.get_running()){
+                levelIndicatorLEDs.showColor(timeoutColor);
+                basic.pause(250)
+                levelIndicatorLEDs.clear();
+                basic.pause(250)
+            }
+        });
+    });
+
+    watchdog.start();
+
     function resetI2CDevices(){
         let reset_pin = DigitalPin.P1;
         pins.digitalWritePin(reset_pin, 1);
         basic.pause(50);
         pins.digitalWritePin(reset_pin, 0);
         basic.pause(250);
+    }
+
+    /**
+     * Sende Herzschlag an Watchdog Timer um Selbstabschaltung zu stoppen.
+     */
+    //% block="Sende Herzschlag an Watchdog Timer um Selbstabschaltung zu stoppen."
+    export function sendHeartbeat() {
+        console.log("Watchdog timer reset.");
+        watchdog.reset();
     }
 
     /**
@@ -399,6 +467,11 @@ namespace MagneticNavigation {
     export function writeAll() {
         let directionBuffer = pins.createBuffer(3)
         let speedBuffer = pins.createBuffer(3)
+
+        if(!watchdog.get_running()){
+            /* Prevent writing values to magnet coils if watchdog timer is lapsed */
+            return;
+        }
                
         //set led strips
         levelIndicatorLEDs.clear();
@@ -670,6 +743,7 @@ namespace nanoMedForLife {
         winkel = handlebit.getAngle(magnetJoystick)
         auslenkung = handlebit.getDeflection(magnetJoystick)
         MagneticNavigation.zeroAllMagnets()
+        MagneticNavigation.watchdog.reset();
         if (wippen) {
             offset_magnet = (offset_magnet == magnetabstand) ? 8 - magnetabstand : magnetabstand
             hauptmagnet = getHauptMagnet(winkel)
