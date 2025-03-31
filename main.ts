@@ -358,7 +358,7 @@ namespace MagneticNavigation {
                     zeroAllMagnets();
                     levelIndicatorLEDs.clear();
                     const timeoutColor = neopixel.rgb(255, 0, 255); // pink
-                    while(!watchdog.get_running() && watchdog !== undefined){
+                    while(!this.running && input.runningTime() - startTime >= this.timeout){
                         levelIndicatorLEDs.showColor(timeoutColor);
                         basic.pause(250)
                         levelIndicatorLEDs.clear();
