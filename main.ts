@@ -318,24 +318,43 @@ namespace MagneticNavigation {
     let electromagnetOutput = [[0, 0], [0, 0], [0, 0], [0, 0]]
     const DriverAddress = [ 0x0B, 0x0C, 0x0D, 0x0A]
     let levelIndicatorLEDs = neopixel.create(DigitalPin.P2, 64, NeoPixelMode.RGB)
+    let firstRun = true;
 
     class Watchdog {
         private timeout: number;
         private running: boolean = false;
+        private startTime: number ;
 
         constructor(timeout: number ) {
             this.timeout = timeout;
         }
 
         start(): void {
+            this.startTime = input.runningTime();
             if (this.running) return;
             this.running = true;
             levelIndicatorLEDs.clear();
-            this.monitor();
+            control.inBackground(() => {
+                basic.pause(this.timeout);
+                if (this.running && input.runningTime() - this.startTime >= this.timeout) {
+                    console.log("Watchdog timeout! Shutting down motors");
+                    this.running = false;
+                    zeroAllMagnets();
+                    levelIndicatorLEDs.clear();
+                    const timeoutColor = neopixel.rgb(255, 0, 255); // pink
+                    while(!this.running && input.runningTime() - this.startTime >= this.timeout){
+                        levelIndicatorLEDs.showColor(timeoutColor);
+                        basic.pause(250)
+                        levelIndicatorLEDs.clear();
+                        basic.pause(250)
+                    }
+                }
+            });
         }
 
         reset(): void {
-            if (!this.running) return; 
+            this.startTime = input.runningTime();
+            if (this.running) return; 
             this.running = false;
             this.start();
         }
@@ -347,30 +366,9 @@ namespace MagneticNavigation {
         get_running(): boolean {
             return this.running;
         }
-
-        private monitor(): void {
-            control.inBackground(() => {
-                let startTime = input.runningTime();
-                basic.pause(this.timeout);
-                if (this.running && input.runningTime() - startTime >= this.timeout) {
-                    console.log("Watchdog timeout! Shutting down motors");
-                    this.running = false;
-                    zeroAllMagnets();
-                    levelIndicatorLEDs.clear();
-                    const timeoutColor = neopixel.rgb(255, 0, 255); // pink
-                    while(!this.running && input.runningTime() - startTime >= this.timeout){
-                        levelIndicatorLEDs.showColor(timeoutColor);
-                        basic.pause(250)
-                        levelIndicatorLEDs.clear();
-                        basic.pause(250)
-                    }
-                }
-            });
-        }
     }
 
-    export const watchdog = new Watchdog(5000); /* TODO: adjust timeout to 5min when done with testing */ 
-    watchdog.start();
+    const watchdog = new Watchdog(3000); /* TODO: adjust timeout to 5min when done with testing */ 
 
     function resetI2CDevices(){
         let reset_pin = DigitalPin.P1;
@@ -403,6 +401,8 @@ namespace MagneticNavigation {
      * Der Index muss zwischen 1 und 8 liegen, ansonsten wird kein Wert gesetzt und ein Alarmton ausgegeben.
      * Leistungen im Plus-Bereich zwischen 0 < 100 erzeugen einen positiven Magnetismus (Nord/ rot).
      * Leistungen mit Minuswerten zwischen 0 < -100 erzeugen einen negativen Magnetismus (Süd/ grün).
+     * Das Ausführen dieser Funktion startet den Watchdog Timer, welcher mit 'sendHeartbeat' aktiv gehalten werden muss.
+     * Ansonsten werden die Magnete nach 5 Minuten deaktiviert (bis wieder ein Herzschlag geschickt wird).
      * @param index des Elektromagneten
      * @param leistung die der Elektromagnet abgeben soll
      */
@@ -415,6 +415,16 @@ namespace MagneticNavigation {
         index?: number,
         leistung?: number) {
 
+        if (firstRun){
+            firstRun = false;
+            watchdog.start();
+        }
+
+        if(!watchdog.get_running()){
+            /* Prevent writing values to magnet coils if watchdog timer is lapsed */
+            return;
+        }
+ 
         if (index >= 1 && index <= 8) {
             let motorDriverIdx = Math.floor((index - 1) / 2)
             let motorDriverPort = (index - 1) % 2
@@ -462,11 +472,7 @@ namespace MagneticNavigation {
         let directionBuffer = pins.createBuffer(3)
         let speedBuffer = pins.createBuffer(3)
 
-        if(!watchdog.get_running()){
-            /* Prevent writing values to magnet coils if watchdog timer is lapsed */
-            return;
-        }
-               
+              
         //set led strips
         levelIndicatorLEDs.clear();
         let motorIdx=0;
@@ -737,7 +743,6 @@ namespace nanoMedForLife {
         winkel = handlebit.getAngle(magnetJoystick)
         auslenkung = handlebit.getDeflection(magnetJoystick)
         MagneticNavigation.zeroAllMagnets()
-        MagneticNavigation.watchdog.reset();
         if (wippen) {
             offset_magnet = (offset_magnet == magnetabstand) ? 8 - magnetabstand : magnetabstand
             hauptmagnet = getHauptMagnet(winkel)
