@@ -1,7 +1,7 @@
 /*
 gamepad package
 */
-//% weight=10 icon="\uf11b" color=#d736ff block="Handlebit" 
+//% weight=10 icon="\uf11b" color=#858585 block="Handlebit" 
 namespace handlebit {
     export enum Button {
         //% block="B1"
@@ -160,7 +160,7 @@ namespace handlebit {
     }
 
     /**
-     * Do something when a button is pushed down and released again.
+     * Führt die eingefügte Funktion aus wenn der Knopf gedrückt wird. Der Controller verfügt über 4 Knöpfe. Gelb, Rot, Controller Links, Controller Rechts.
      * @param button the button that needs to be pressed
      * @param body code to run when event is raised
      */
@@ -170,7 +170,7 @@ namespace handlebit {
     }
 
     /**
-     * Liest den Wert des gewünschten Joystick in die gewünschte Richtung. 
+     * Liest den Wert des gewünschten Joystick in gewünschter Richtung. 
      * Die Werte liegen im Bereich -100 bis 100.
      */
     //% weight=84 blockId=getSensorValue block="|%direction|-Wert von Joystick |%joystick|"
@@ -238,8 +238,8 @@ namespace handlebit {
     }
     
      /**
-     * Berechnet den Winkelwert des gewünschten Joystick.
-     * Die Werte liegen im Bereich 0 bis 360 Grad mit Definition am Einheitskreis.
+     * Der linke Joystick adressiert die Magnete anhand Richtung der Auslenkung.
+     * Die Winkel werden durch die 8 Teilkreise aufgeteilt.
      */
     //% blockId=getAngle block="Winkel Joystick |%joystick|"
     export function getAngle(joystick: Joystick) : number {
@@ -270,8 +270,8 @@ namespace handlebit {
     }
 
     /**
-     * Berechnet die Auslenkung des gewünschten Joystick.
-     * Die Werte liegen im Bereich -100 bis 100.
+     * Steuert die Auslenkung des gewünschten Joystick und reguliert damit die Magnetstärke.
+     * Die Werte liegen im Bereich -100 bis 100 und sind abhängig vom Abstand zum Nullpunkt.
      */
     //% blockId=getDeflection block="Auslenkung Joystick |%joystick|"
     export function getDeflection(joystick: Joystick): number {
@@ -296,7 +296,7 @@ namespace handlebit {
 }
 
 /*
-Magnetisches Spielfeld Interface für steuern der Elektromagnete nanomed4life
+Magnetspielfeld mit micro:Bit steuern.
 */
 //% weight=10 icon="\uf192" color=#ff5733 block="Magnetisches Spielfeld" 
 namespace MagneticNavigation {
