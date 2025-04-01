@@ -368,7 +368,7 @@ namespace MagneticNavigation {
         }
     }
 
-    const watchdog = new Watchdog(3000); /* TODO: adjust timeout to 5min when done with testing */ 
+    export const watchdog = new Watchdog(3000); /* TODO: adjust timeout to 5min when done with testing */ 
 
     function resetI2CDevices(){
         let reset_pin = DigitalPin.P1;
@@ -740,6 +740,7 @@ namespace nanoMedForLife {
      */
     //% weight=86 blockId=setMagneticField block="Elektromagnete mit Joystick steuern"
     export function setMagneticField() {
+        MagneticNavigation.watchdog.reset();
         winkel = handlebit.getAngle(magnetJoystick)
         auslenkung = handlebit.getDeflection(magnetJoystick)
         MagneticNavigation.zeroAllMagnets()
