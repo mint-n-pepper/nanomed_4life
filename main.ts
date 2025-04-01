@@ -368,7 +368,7 @@ namespace MagneticNavigation {
         }
     }
 
-    export const watchdog = new Watchdog(3000); /* TODO: adjust timeout to 5min when done with testing */ 
+    export const watchdog = new Watchdog(5*60*1000); /*Timeout after 5 minutes */
 
     function resetI2CDevices(){
         let reset_pin = DigitalPin.P1;
