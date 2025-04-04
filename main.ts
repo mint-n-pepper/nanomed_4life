@@ -1,7 +1,265 @@
 /*
 gamepad package
 */
-//% weight=10 icon="\uf11b" color=#dbdbdb block="nanomed4life Controller" 
+//% weight=10 icon="\uf11b" color=#999999 block="nanomed4life Magnetspielfeld" 
+namespace MagneticNavigation {
+    const MotorSpeedSet = 0x82
+    const PWMFrequenceSet = 0x84
+    const  DirectionSet = 0xaa
+    const MotorSetA = 0xa1
+    const MotorSetB = 0xa5
+    const Nothing = 0x01
+    const EnableStepper = 0x1a
+    const UnenableStepper = 0x1b
+    const Stepernu = 0x1c
+    const BothClockWise = 0x0a
+    const BothAntiClockWise = 0x05
+    const M1CWM2ACW = 0x06
+    const M1ACWM2CW = 0x09
+    const I2CMotorDriverAdd = 0x0d
+    let electromagnetDirection = [[0, 0], [0, 0], [0, 0], [0, 0]]
+    let electromagnetOutput = [[0, 0], [0, 0], [0, 0], [0, 0]]
+    const DriverAddress = [ 0x0B, 0x0C, 0x0D, 0x0A]
+    let levelIndicatorLEDs = neopixel.create(DigitalPin.P2, 64, NeoPixelMode.RGB)
+    let firstRun = true;
+
+    class Watchdog {
+        private timeout: number;
+        private running: boolean = false;
+        private startTime: number ;
+
+        constructor(timeout: number ) {
+            this.timeout = timeout;
+        }
+
+        start(): void {
+            this.startTime = input.runningTime();
+            if (this.running) return;
+            this.running = true;
+            levelIndicatorLEDs.clear();
+            control.inBackground(() => {
+                basic.pause(this.timeout);
+                if (this.running && input.runningTime() - this.startTime >= this.timeout) {
+                    console.log("Watchdog timeout! Shutting down motors");
+                    this.running = false;
+                    zeroAllMagnets();
+                    levelIndicatorLEDs.clear();
+                    const timeoutColor = neopixel.rgb(255, 0, 255); // pink
+                    while(!this.running && input.runningTime() - this.startTime >= this.timeout){
+                        levelIndicatorLEDs.showColor(timeoutColor);
+                        basic.pause(250)
+                        levelIndicatorLEDs.clear();
+                        basic.pause(250)
+                    }
+                }
+            });
+        }
+
+        reset(): void {
+            this.startTime = input.runningTime();
+            if (this.running) return; 
+            this.running = false;
+            this.start();
+        }
+
+        stop(): void {
+            this.running = false;
+        }
+
+        get_running(): boolean {
+            return this.running;
+        }
+    }
+
+    export const watchdog = new Watchdog(5*60*1000); /*Timeout after 5 minutes */
+
+    function resetI2CDevices(){
+        let reset_pin = DigitalPin.P1;
+        pins.digitalWritePin(reset_pin, 1);
+        basic.pause(50);
+        pins.digitalWritePin(reset_pin, 0);
+        basic.pause(250);
+    }
+
+    /**
+     * Achtung! Dies setzt den eingebauten Timer ab und verhindert somit, dass die Elektromagnete von selbst abschalten.
+     * Die Sicherheitsmassnahme bewirkt, dass nach 5 Minuten Dauerbetrieb das Spielfeld ausschaltet um vor Erhitzen zu schützen.
+     */
+    //% block="Sicherheits-Timeout ausschalten!"
+    export function sendHeartbeat() {
+        console.log("Watchdog timer reset.");
+        watchdog.reset();
+    }
+
+    /**
+     * Schaltet alle Elektromagnete aus. Diese Funktion dient als Vereichfachung zum  Programmieren.
+     */
+    //% block="Setze Leistung für alle Elektromagnete auf 0."
+    export function zeroAllMagnets() {
+        electromagnetDirection = [[0, 0], [0, 0], [0, 0], [0, 0]]
+        electromagnetOutput = [[0, 0], [0, 0], [0, 0], [0, 0]]
+    }
+
+    /**
+     * Setze die Leistung für die Elektromagnete (Index= 1 bis 8).
+     * Ein Alarmton wird ausgegeben wenn kein Wert gesetzt ist.
+     * Leistungen im Plus-Bereich zwischen 0 < 100 erzeugen einen positiven Magnetismus (rote LEDs).
+     * Leistungen mit Minuswerten zwischen 0 < -100 erzeugen einen negativen Magnetismus (grüne LEDs).
+     * Das Ausführen dieser Funktion startet den Sicherheits Timer, um die Magnete vor Erhitzen zu schützen- 
+     * die Magnete schalten somit nach 5 Minuten ab. mit 'Selbstabschaltung neu starten' aktiv gehalten werden muss.
+     * @param index des Elektromagnets
+     * @param leistung die der Elektromagnet abgeben soll
+     */
+    //% block="Setze Leistung für Elektromagnet $index auf $leistung"
+    //% leistung.min=-100 leistung.max=100
+    //% index.min=1 index.max=8
+    //% leistung.defl=0
+    //% index.defl=1
+    export function setMagnetPower(
+        index?: number,
+        leistung?: number) {
+
+        if (firstRun){
+            firstRun = false;
+            watchdog.start();
+        }
+
+        if(!watchdog.get_running()){
+            /* Prevent writing values to magnet coils if watchdog timer is lapsed */
+            return;
+        }
+ 
+        if (index >= 1 && index <= 8) {
+            let motorDriverIdx = Math.floor((index - 1) / 2)
+            let motorDriverPort = (index - 1) % 2
+
+            // set new direction
+            if (leistung < 0) {
+                electromagnetDirection[motorDriverIdx][motorDriverPort] = 1
+            } else {
+                electromagnetDirection[motorDriverIdx][motorDriverPort] = 0
+            }
+            // set new speed
+            electromagnetOutput[motorDriverIdx][motorDriverPort] = Math.abs(leistung)
+            if (electromagnetOutput[motorDriverIdx][motorDriverPort] > 100) {
+                electromagnetOutput[motorDriverIdx][motorDriverPort] = 100
+            }
+        }
+        else {
+            music.play(music.tonePlayable(262, music.beat(BeatFraction.Whole)), music.PlaybackMode.UntilDone)
+        }
+    }
+
+    /**
+     * Setze die Leistung für alle Elektromagnete.
+     * Wenn die Arraylänge nicht 8 beträgt wird kein Wert gesetzt und ein Ton ausgegeben.
+     * @param magnetLevels Array mit 8 Leistungswerten im Bereich [-100;100]
+     */
+    //% block="Setze die Werte für alle Elektromagnete: $magnetLevels"
+    function setAllMagnetPowers(magnetLevels: number[]): void {
+        if (magnetLevels.length == 8) {
+            for (let idx = 0; idx < 8; idx++) {
+                setMagnetPower(idx + 1, magnetLevels[idx])
+            }
+        }
+        else {
+            music.play(music.tonePlayable(262, music.beat(BeatFraction.Whole)), music.PlaybackMode.UntilDone)
+        }
+    }
+
+    /**
+     * Sendet die aufgeführten Werte an das Magnetspielfeld, es ist eine Funktion, welche immer ausgeführt werden muss, ansonsten reagieren die Magnete nicht.
+     * Die Funktion kann am Ende des Programms einmalig ausgeführt werden. Es ist jedoch auch möglich dies nach jedem Programmschritt oder Leistungswechsel der Magnete auszuführen. 
+     */
+    //% block="Sende alle Leistungswerte zum Magnetspielfeld"
+    export function writeAll() {
+        let directionBuffer = pins.createBuffer(3)
+        let speedBuffer = pins.createBuffer(3)
+
+              
+        //set led strips
+        levelIndicatorLEDs.clear();
+        let motorIdx=0;
+        let ledStartIdx=0;
+        for (let driverIdx = 0; driverIdx < 4; driverIdx++) {
+            //set direction buffer
+            directionBuffer[0] = DirectionSet
+            if (electromagnetDirection[driverIdx][0] == 0 && electromagnetDirection[driverIdx][1] == 0) {
+                directionBuffer[1] = BothAntiClockWise
+            } else if (electromagnetDirection[driverIdx][0] == 0 && electromagnetDirection[driverIdx][1] == 1) {
+                directionBuffer[1] = M1ACWM2CW
+            } else if (electromagnetDirection[driverIdx][0] == 1 && electromagnetDirection[driverIdx][1] == 0) {
+                directionBuffer[1] = M1CWM2ACW
+            } else {
+                //both are forward (1)
+                directionBuffer[1] = BothClockWise
+            }
+            directionBuffer[2] = Nothing
+            let status;
+            status = pins.i2cWriteBuffer(DriverAddress[driverIdx], directionBuffer, false)
+
+            if (status != 0){ resetI2CDevices(); }
+
+            basic.pause(1)
+
+            //set power
+            let scaling_pwm = 2.55 * 0.85;
+            speedBuffer[0] = MotorSpeedSet
+            speedBuffer[1] = Math.floor(electromagnetOutput[driverIdx][0]*scaling_pwm)
+            speedBuffer[2] = Math.floor(electromagnetOutput[driverIdx][1]*scaling_pwm)
+            status = pins.i2cWriteBuffer(DriverAddress[driverIdx], speedBuffer, false)
+
+            if (status != 0){ resetI2CDevices(); }
+
+            //set all LED lights
+            for (let portIdx = 0; portIdx < 2; portIdx++) {
+                motorIdx=driverIdx*2+portIdx
+
+                // Since we want angle zero to be on index 1 (first coil), we also have
+                // to adjust the LED index. 
+                if (motorIdx == 6){
+                    ledStartIdx=0
+                }
+                else if( motorIdx == 7){
+                    ledStartIdx=8
+                }
+                else{
+                    // Skip first two LED bars which are physically connected first.
+                    ledStartIdx=motorIdx*8 + (2 * 8)
+                }
+
+                let colorChoice = neopixel.rgb(0, 255, 0)
+                if (electromagnetDirection[driverIdx][portIdx]>0) {
+                    colorChoice = neopixel.rgb(255, 0, 0)
+                      }
+                if (electromagnetOutput[driverIdx][portIdx] > 10) {
+                    levelIndicatorLEDs.setPixelColor(ledStartIdx+3, colorChoice)
+                    levelIndicatorLEDs.setPixelColor(ledStartIdx+4, colorChoice)
+                }
+                if (electromagnetOutput[driverIdx][portIdx] > 40) {
+                    levelIndicatorLEDs.setPixelColor(ledStartIdx+2, colorChoice)
+                    levelIndicatorLEDs.setPixelColor(ledStartIdx+5, colorChoice)
+                }
+                if (electromagnetOutput[driverIdx][portIdx] > 70) {
+                    levelIndicatorLEDs.setPixelColor(ledStartIdx+1, colorChoice)
+                    levelIndicatorLEDs.setPixelColor(ledStartIdx+6, colorChoice)
+                }
+                if (electromagnetOutput[driverIdx][portIdx] > 95) {
+                    levelIndicatorLEDs.setPixelColor(ledStartIdx, colorChoice)
+                    levelIndicatorLEDs.setPixelColor(ledStartIdx+7, colorChoice)
+                }
+            }
+            basic.pause(1)
+        }
+
+        levelIndicatorLEDs.show()
+    }
+}
+
+/*
+gamepad package
+*/
+//% weight=10 icon="\uf11b" color=#777777 block="nanomed4life Controller" 
 namespace handlebit {
     export enum Button {
         //% block="B1"
@@ -292,264 +550,6 @@ namespace handlebit {
             value=100;
         }
         return value;
-    }
-}
-
-/*
-gamepad package
-*/
-//% weight=10 icon="\uf11b" color=#999999 block="nanomed4life Magnetspielfeld" 
-namespace MagneticNavigation {
-    const MotorSpeedSet = 0x82
-    const PWMFrequenceSet = 0x84
-    const  DirectionSet = 0xaa
-    const MotorSetA = 0xa1
-    const MotorSetB = 0xa5
-    const Nothing = 0x01
-    const EnableStepper = 0x1a
-    const UnenableStepper = 0x1b
-    const Stepernu = 0x1c
-    const BothClockWise = 0x0a
-    const BothAntiClockWise = 0x05
-    const M1CWM2ACW = 0x06
-    const M1ACWM2CW = 0x09
-    const I2CMotorDriverAdd = 0x0d
-    let electromagnetDirection = [[0, 0], [0, 0], [0, 0], [0, 0]]
-    let electromagnetOutput = [[0, 0], [0, 0], [0, 0], [0, 0]]
-    const DriverAddress = [ 0x0B, 0x0C, 0x0D, 0x0A]
-    let levelIndicatorLEDs = neopixel.create(DigitalPin.P2, 64, NeoPixelMode.RGB)
-    let firstRun = true;
-
-    class Watchdog {
-        private timeout: number;
-        private running: boolean = false;
-        private startTime: number ;
-
-        constructor(timeout: number ) {
-            this.timeout = timeout;
-        }
-
-        start(): void {
-            this.startTime = input.runningTime();
-            if (this.running) return;
-            this.running = true;
-            levelIndicatorLEDs.clear();
-            control.inBackground(() => {
-                basic.pause(this.timeout);
-                if (this.running && input.runningTime() - this.startTime >= this.timeout) {
-                    console.log("Watchdog timeout! Shutting down motors");
-                    this.running = false;
-                    zeroAllMagnets();
-                    levelIndicatorLEDs.clear();
-                    const timeoutColor = neopixel.rgb(255, 0, 255); // pink
-                    while(!this.running && input.runningTime() - this.startTime >= this.timeout){
-                        levelIndicatorLEDs.showColor(timeoutColor);
-                        basic.pause(250)
-                        levelIndicatorLEDs.clear();
-                        basic.pause(250)
-                    }
-                }
-            });
-        }
-
-        reset(): void {
-            this.startTime = input.runningTime();
-            if (this.running) return; 
-            this.running = false;
-            this.start();
-        }
-
-        stop(): void {
-            this.running = false;
-        }
-
-        get_running(): boolean {
-            return this.running;
-        }
-    }
-
-    export const watchdog = new Watchdog(5*60*1000); /*Timeout after 5 minutes */
-
-    function resetI2CDevices(){
-        let reset_pin = DigitalPin.P1;
-        pins.digitalWritePin(reset_pin, 1);
-        basic.pause(50);
-        pins.digitalWritePin(reset_pin, 0);
-        basic.pause(250);
-    }
-
-    /**
-     * Achtung! Dies setzt den eingebauten Timer ab und verhindert somit, dass die Elektromagnete von selbst abschalten.
-     * Die Sicherheitsmassnahme bewirkt, dass nach 5 Minuten Dauerbetrieb das Spielfeld ausschaltet um vor Erhitzen zu schützen.
-     */
-    //% block="Sicherheits-Timeout ausschalten!"
-    export function sendHeartbeat() {
-        console.log("Watchdog timer reset.");
-        watchdog.reset();
-    }
-
-    /**
-     * Schaltet alle Elektromagnete aus. Diese Funktion dient als Vereichfachung zum  Programmieren.
-     */
-    //% block="Setze Leistung für alle Elektromagnete auf 0."
-    export function zeroAllMagnets() {
-        electromagnetDirection = [[0, 0], [0, 0], [0, 0], [0, 0]]
-        electromagnetOutput = [[0, 0], [0, 0], [0, 0], [0, 0]]
-    }
-
-    /**
-     * Setze die Leistung für die Elektromagnete (Index= 1 bis 8).
-     * Ein Alarmton wird ausgegeben wenn kein Wert gesetzt ist.
-     * Leistungen im Plus-Bereich zwischen 0 < 100 erzeugen einen positiven Magnetismus (rote LEDs).
-     * Leistungen mit Minuswerten zwischen 0 < -100 erzeugen einen negativen Magnetismus (grüne LEDs).
-     * Das Ausführen dieser Funktion startet den Sicherheits Timer, um die Magnete vor Erhitzen zu schützen- 
-     * die Magnete schalten somit nach 5 Minuten ab. mit 'Selbstabschaltung neu starten' aktiv gehalten werden muss.
-     * @param index des Elektromagnets
-     * @param leistung die der Elektromagnet abgeben soll
-     */
-    //% block="Setze Leistung für Elektromagnet $index auf $leistung"
-    //% leistung.min=-100 leistung.max=100
-    //% index.min=1 index.max=8
-    //% leistung.defl=0
-    //% index.defl=1
-    export function setMagnetPower(
-        index?: number,
-        leistung?: number) {
-
-        if (firstRun){
-            firstRun = false;
-            watchdog.start();
-        }
-
-        if(!watchdog.get_running()){
-            /* Prevent writing values to magnet coils if watchdog timer is lapsed */
-            return;
-        }
- 
-        if (index >= 1 && index <= 8) {
-            let motorDriverIdx = Math.floor((index - 1) / 2)
-            let motorDriverPort = (index - 1) % 2
-
-            // set new direction
-            if (leistung < 0) {
-                electromagnetDirection[motorDriverIdx][motorDriverPort] = 1
-            } else {
-                electromagnetDirection[motorDriverIdx][motorDriverPort] = 0
-            }
-            // set new speed
-            electromagnetOutput[motorDriverIdx][motorDriverPort] = Math.abs(leistung)
-            if (electromagnetOutput[motorDriverIdx][motorDriverPort] > 100) {
-                electromagnetOutput[motorDriverIdx][motorDriverPort] = 100
-            }
-        }
-        else {
-            music.play(music.tonePlayable(262, music.beat(BeatFraction.Whole)), music.PlaybackMode.UntilDone)
-        }
-    }
-
-    /**
-     * Setze die Leistung für alle Elektromagnete.
-     * Wenn die Arraylänge nicht 8 beträgt wird kein Wert gesetzt und ein Ton ausgegeben.
-     * @param magnetLevels Array mit 8 Leistungswerten im Bereich [-100;100]
-     */
-    //% block="Setze die Werte für alle Elektromagnete: $magnetLevels"
-    function setAllMagnetPowers(magnetLevels: number[]): void {
-        if (magnetLevels.length == 8) {
-            for (let idx = 0; idx < 8; idx++) {
-                setMagnetPower(idx + 1, magnetLevels[idx])
-            }
-        }
-        else {
-            music.play(music.tonePlayable(262, music.beat(BeatFraction.Whole)), music.PlaybackMode.UntilDone)
-        }
-    }
-
-    /**
-     * Sendet die aufgeführten Werte an das Magnetspielfeld, es ist eine Funktion, welche immer ausgeführt werden muss, ansonsten reagieren die Magnete nicht.
-     * Die Funktion kann am Ende des Programms einmalig ausgeführt werden. Es ist jedoch auch möglich dies nach jedem Programmschritt oder Leistungswechsel der Magnete auszuführen. 
-     */
-    //% block="Sende alle Leistungswerte zum Magnetspielfeld"
-    export function writeAll() {
-        let directionBuffer = pins.createBuffer(3)
-        let speedBuffer = pins.createBuffer(3)
-
-              
-        //set led strips
-        levelIndicatorLEDs.clear();
-        let motorIdx=0;
-        let ledStartIdx=0;
-        for (let driverIdx = 0; driverIdx < 4; driverIdx++) {
-            //set direction buffer
-            directionBuffer[0] = DirectionSet
-            if (electromagnetDirection[driverIdx][0] == 0 && electromagnetDirection[driverIdx][1] == 0) {
-                directionBuffer[1] = BothAntiClockWise
-            } else if (electromagnetDirection[driverIdx][0] == 0 && electromagnetDirection[driverIdx][1] == 1) {
-                directionBuffer[1] = M1ACWM2CW
-            } else if (electromagnetDirection[driverIdx][0] == 1 && electromagnetDirection[driverIdx][1] == 0) {
-                directionBuffer[1] = M1CWM2ACW
-            } else {
-                //both are forward (1)
-                directionBuffer[1] = BothClockWise
-            }
-            directionBuffer[2] = Nothing
-            let status;
-            status = pins.i2cWriteBuffer(DriverAddress[driverIdx], directionBuffer, false)
-
-            if (status != 0){ resetI2CDevices(); }
-
-            basic.pause(1)
-
-            //set power
-            let scaling_pwm = 2.55 * 0.85;
-            speedBuffer[0] = MotorSpeedSet
-            speedBuffer[1] = Math.floor(electromagnetOutput[driverIdx][0]*scaling_pwm)
-            speedBuffer[2] = Math.floor(electromagnetOutput[driverIdx][1]*scaling_pwm)
-            status = pins.i2cWriteBuffer(DriverAddress[driverIdx], speedBuffer, false)
-
-            if (status != 0){ resetI2CDevices(); }
-
-            //set all LED lights
-            for (let portIdx = 0; portIdx < 2; portIdx++) {
-                motorIdx=driverIdx*2+portIdx
-
-                // Since we want angle zero to be on index 1 (first coil), we also have
-                // to adjust the LED index. 
-                if (motorIdx == 6){
-                    ledStartIdx=0
-                }
-                else if( motorIdx == 7){
-                    ledStartIdx=8
-                }
-                else{
-                    // Skip first two LED bars which are physically connected first.
-                    ledStartIdx=motorIdx*8 + (2 * 8)
-                }
-
-                let colorChoice = neopixel.rgb(0, 255, 0)
-                if (electromagnetDirection[driverIdx][portIdx]>0) {
-                    colorChoice = neopixel.rgb(255, 0, 0)
-                      }
-                if (electromagnetOutput[driverIdx][portIdx] > 10) {
-                    levelIndicatorLEDs.setPixelColor(ledStartIdx+3, colorChoice)
-                    levelIndicatorLEDs.setPixelColor(ledStartIdx+4, colorChoice)
-                }
-                if (electromagnetOutput[driverIdx][portIdx] > 40) {
-                    levelIndicatorLEDs.setPixelColor(ledStartIdx+2, colorChoice)
-                    levelIndicatorLEDs.setPixelColor(ledStartIdx+5, colorChoice)
-                }
-                if (electromagnetOutput[driverIdx][portIdx] > 70) {
-                    levelIndicatorLEDs.setPixelColor(ledStartIdx+1, colorChoice)
-                    levelIndicatorLEDs.setPixelColor(ledStartIdx+6, colorChoice)
-                }
-                if (electromagnetOutput[driverIdx][portIdx] > 95) {
-                    levelIndicatorLEDs.setPixelColor(ledStartIdx, colorChoice)
-                    levelIndicatorLEDs.setPixelColor(ledStartIdx+7, colorChoice)
-                }
-            }
-            basic.pause(1)
-        }
-
-        levelIndicatorLEDs.show()
     }
 }
 
