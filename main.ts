@@ -1,7 +1,7 @@
 /*
 gamepad package
 */
-//% weight=10 icon="\uf11b" color=#858585 block="Handlebit" 
+//% weight=10 icon="\uf11b" color=#dbdbdb block="nanomed4life Controller" 
 namespace handlebit {
     export enum Button {
         //% block="B1"
@@ -238,8 +238,8 @@ namespace handlebit {
     }
     
      /**
-     * Der linke Joystick adressiert die Magnete anhand Richtung der Auslenkung.
-     * Die Winkel werden durch die 8 Teilkreise aufgeteilt.
+     * Der linke Joystick adressiert die Elektromagnete gemäss Richtung der Auslenkung.
+     * Die Winkel werden dabei durch die 8 Teilkreise aufgeteilt.
      */
     //% blockId=getAngle block="Winkel Joystick |%joystick|"
     export function getAngle(joystick: Joystick) : number {
@@ -270,8 +270,8 @@ namespace handlebit {
     }
 
     /**
-     * Steuert die Auslenkung des gewünschten Joystick und reguliert damit die Magnetstärke.
-     * Die Werte liegen im Bereich -100 bis 100 und sind abhängig vom Abstand zum Nullpunkt.
+     * Steuert die Auslenkung des Joysticks und reguliert damit die Magnetstärke.
+     * Die einzugebenden Werte liegen im Bereich -100 bis 100. Minuswerte erzeugen (rot/ Nord) 
      */
     //% blockId=getDeflection block="Auslenkung Joystick |%joystick|"
     export function getDeflection(joystick: Joystick): number {
@@ -298,7 +298,7 @@ namespace handlebit {
 /*
 gamepad package
 */
-//% weight=10 icon="\uf192" color=#454545 block="Magnetspielfeld" 
+//% weight=10 icon="\uf11b" color=#999999 block="nanomed4life Magnetspielfeld" 
 namespace MagneticNavigation {
     const MotorSpeedSet = 0x82
     const PWMFrequenceSet = 0x84
@@ -379,18 +379,19 @@ namespace MagneticNavigation {
     }
 
     /**
-     * Setzt den Timer auf 0 und verhindert somit die Selbstabschaltung durch den Watchdog.
+     * Achtung! Dies setzt den eingebauten Timer ab und verhindert somit, dass die Elektromagnete von selbst abschalten.
+     * Die Sicherheitsmassnahme bewirkt, dass nach 5 Minuten Dauerbetrieb das Spielfeld ausschaltet um vor Erhitzen zu schützen.
      */
-    //% block="Selbstabschaltung neu starten"
+    //% block="Sicherheits-Timeout ausschalten!"
     export function sendHeartbeat() {
         console.log("Watchdog timer reset.");
         watchdog.reset();
     }
 
     /**
-     * Setze Leistung für alle Elektromagnete auf 0.
+     * Schaltet alle Elektromagnete aus. Diese Funktion dient als Vereichfachung zum  Programmieren.
      */
-    //% block="Diese Funktion schaltet alle Magnete ab und dient so als Vereichfachung des Programmierens."
+    //% block="Setze Leistung für alle Elektromagnete auf 0."
     export function zeroAllMagnets() {
         electromagnetDirection = [[0, 0], [0, 0], [0, 0], [0, 0]]
         electromagnetOutput = [[0, 0], [0, 0], [0, 0], [0, 0]]
@@ -555,7 +556,7 @@ namespace MagneticNavigation {
 /*
 * Magnetspielfeld und Advancer mit Joysticks steuern
 */
-//% weight=10 icon="\uf11b" color=#424242 block="nanomed4life" 
+//% weight=10 icon="\uf11b" color=#333333 block="nanomed4life Challenge" 
 namespace nanoMedForLife {
     let sideBeitrag = -1
     let hauptBeitrag = -1
@@ -671,12 +672,12 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Empfänger des per Funk gesendeten Wertes für den Antrieb des Advancers. 
+     * Empfängt per Funk die vom Joystick Rechts gesendeten Werte um den Advancers anzutreiben. Achtung- nur seitliche Bewegungen werden ausgeführt.
      * Dem Block muss die Funktion hinzugefügt werden, welche für den Antrieb des Motors zuständig ist.
      * @param optionsOrCallback Optional configuration object or callback function
      * @param callbackOrUndefined Optional callback function
      */
-    //% weight=86 blockId=receivingValues block="Empfängt Werte für:"
+    //% weight=86 blockId=receivingValues block="Empfängt Werte des Joystick rechts:"
     export function onReceivedNumberHandler( callback: Action
     ): void {
         radio.onReceivedNumber(function (advancerSpeed: number) {
@@ -734,8 +735,8 @@ namespace nanoMedForLife {
 
     /**
      * Sendet die Werte von “Auslenkung” (Magnetstärke) und 
-     * “Winkel” (Richtung / Magnetnummer) des Joysticks Links an 
-     * das Magnetspielfeld via Kabel.
+     * “Winkel” (Richtung / Magnetnummer) des linken Joysticks an 
+     * das Magnetspielfeld via Kabel. Optional können weitere Funktionen auf den Knöpfen belegt werden um das Verhalten der Magnete zu ändern.
      * @param magnetJoystick
      */
     //% weight=86 blockId=setMagneticField block="Magnetspielfeld mit Joystick Links steuern"
@@ -772,7 +773,7 @@ namespace nanoMedForLife {
      * vom rechten Joystick an den zweiten Micro:bit, welcher den Advancermotor antreibt.
      * Dieser microBit muss die selbe Funknummer aufweisen, um das Signal zu erhalten.
      */
-    //% weight=86 blockId=sendAdvancerCommand block="Joystick Rechts"
+    //% weight=86 blockId=sendAdvancerCommand block="Advancermotor mit Joystick Rechts ansteuern"
     export function sendAdvancerCommand() {
         let advancerSpeed = handlebit.getSensorValue(handlebit.Direction.DIR_X, advancerJoystick)
         if (advancerSpeed > 2 || advancerSpeed < -2) {
@@ -783,8 +784,8 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Dieser Block treibt den Motor des Advancers an, wenn dieser dem Empfänger hinzugefügt wird.
-     * Beachte, dass der "Empfänger" dieselbe Kanal Nummer wie “Joystick Rechts" aufweisen muss.
+     * Dieser Block treibt den Motor des Advancers an, wenn dieser dem Empfängerblock hinzugefügt wird.
+     * Beachte, dass das Progamm des nanomed4life Controllers dieselbe Kanal Nummer wie der auf dem Advancer micro:Bit aufweisen muss.
      */
     //% weight=86 blockId=setAdvancerSpeed block="Antrieb des Advancermotors"
     export function setAdvancerSpeed() {
