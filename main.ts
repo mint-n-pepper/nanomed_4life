@@ -296,9 +296,9 @@ namespace handlebit {
 }
 
 /*
-Magnetspielfeld mit micro:Bit steuern.
+gamepad package
 */
-//% weight=10 icon="\uf192" color=#ff5733 block="Magnetisches Spielfeld" 
+//% weight=10 icon="\uf192" color=#454545 block="Magnetspielfeld" 
 namespace MagneticNavigation {
     const MotorSpeedSet = 0x82
     const PWMFrequenceSet = 0x84
@@ -379,9 +379,9 @@ namespace MagneticNavigation {
     }
 
     /**
-     * Sende Herzschlag an Watchdog Timer um Selbstabschaltung zu stoppen.
+     * Setzt den Timer auf 0 und verhindert somit die Selbstabschaltung durch den Watchdog.
      */
-    //% block="Sende Herzschlag"
+    //% block="Selbstabschaltung neu starten"
     export function sendHeartbeat() {
         console.log("Watchdog timer reset.");
         watchdog.reset();
@@ -390,20 +390,20 @@ namespace MagneticNavigation {
     /**
      * Setze Leistung für alle Elektromagnete auf 0.
      */
-    //% block="Setze Leistung für alle Elektromagnete auf 0"
+    //% block="Diese Funktion schaltet alle Magnete ab und dient so als Vereichfachung des Programmierens."
     export function zeroAllMagnets() {
         electromagnetDirection = [[0, 0], [0, 0], [0, 0], [0, 0]]
         electromagnetOutput = [[0, 0], [0, 0], [0, 0], [0, 0]]
     }
 
     /**
-     * Setze die Leistung für einzelnen Elektromagneten.
-     * Der Index muss zwischen 1 und 8 liegen, ansonsten wird kein Wert gesetzt und ein Alarmton ausgegeben.
-     * Leistungen im Plus-Bereich zwischen 0 < 100 erzeugen einen positiven Magnetismus (Nord/ rot).
-     * Leistungen mit Minuswerten zwischen 0 < -100 erzeugen einen negativen Magnetismus (Süd/ grün).
-     * Das Ausführen dieser Funktion startet den Watchdog Timer, welcher mit 'sendHeartbeat' aktiv gehalten werden muss.
-     * Ansonsten werden die Magnete nach 5 Minuten deaktiviert (bis wieder ein Herzschlag geschickt wird).
-     * @param index des Elektromagneten
+     * Setze die Leistung für die Elektromagnete (Index= 1 bis 8).
+     * Ein Alarmton wird ausgegeben wenn kein Wert gesetzt ist.
+     * Leistungen im Plus-Bereich zwischen 0 < 100 erzeugen einen positiven Magnetismus (rote LEDs).
+     * Leistungen mit Minuswerten zwischen 0 < -100 erzeugen einen negativen Magnetismus (grüne LEDs).
+     * Das Ausführen dieser Funktion startet den Sicherheits Timer, um die Magnete vor Erhitzen zu schützen- 
+     * die Magnete schalten somit nach 5 Minuten ab. mit 'Selbstabschaltung neu starten' aktiv gehalten werden muss.
+     * @param index des Elektromagnets
      * @param leistung die der Elektromagnet abgeben soll
      */
     //% block="Setze Leistung für Elektromagnet $index auf $leistung"
@@ -447,7 +447,7 @@ namespace MagneticNavigation {
     }
 
     /**
-     * Setze die Leistung für alle Elektromagneten.
+     * Setze die Leistung für alle Elektromagnete.
      * Wenn die Arraylänge nicht 8 beträgt wird kein Wert gesetzt und ein Ton ausgegeben.
      * @param magnetLevels Array mit 8 Leistungswerten im Bereich [-100;100]
      */
@@ -464,10 +464,10 @@ namespace MagneticNavigation {
     }
 
     /**
-     * Sende alle Leistungswerte zu den Motortreibern und aktiviere die Neopixel.
-     * Muss immer ausgeführt werden wenn neu gesetzte Werte angezeigt werden sollen.
+     * Sendet die aufgeführten Werte an das Magnetspielfeld, es ist eine Funktion, welche immer ausgeführt werden muss, ansonsten reagieren die Magnete nicht.
+     * Die Funktion kann am Ende des Programms einmalig ausgeführt werden. Es ist jedoch auch möglich dies nach jedem Programmschritt oder Leistungswechsel der Magnete auszuführen. 
      */
-    //% block="Sende alle Leistungswerte zum Spielfeld"
+    //% block="Sende alle Leistungswerte zum Magnetspielfeld"
     export function writeAll() {
         let directionBuffer = pins.createBuffer(3)
         let speedBuffer = pins.createBuffer(3)
@@ -553,7 +553,7 @@ namespace MagneticNavigation {
 }
 
 /*
-* Magnetsiches Spielfeld mit Handlebit Joystick und Advancer Steuerung
+* Magnetspielfeld und Advancer mit Joysticks steuern
 */
 //% weight=10 icon="\uf11b" color=#424242 block="nanomed4life" 
 namespace nanoMedForLife {
@@ -590,7 +590,7 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Funktion für den Baustein «Wenn Knopf ... geklickt» 
+     * Funktion für den Baustein «Wenn Knopf ... gedrückt» 
      * Ändert die Ansteuerung einzelner Magnete zum Modus mit Gegenmagnet.
      * Das Gegenmagnet erzeugt ein homogenes Magnetfeld wenn dazu 
      * die Dauermagnete «booster» ins Spielfeld eingesetzt sind.
@@ -602,7 +602,8 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Wenn in den Baustein «Wenn Knopf … geklickt» eingefügt schaltet der Modus Oszillieren ein / aus.
+     * Wenn in den Baustein «Wenn Knopf … gedrückt» eingefügt schaltet der Modus Oszillieren ein oder aus.
+     * Zusätzlich kann auf einem anderen Knopf die Oszillation von 3 auf 5 Magnete geändert werden
      */
     //% weight=86 blockId=switchModus block="Oszillation Ein/Aus"
     export function switchModus() {
@@ -610,9 +611,9 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Funktion für den Baustein «Wenn Knopf … geklickt»
-     * Diese Funktion verbreitert den Abstand der oszillierenden
-     * Magnete von 3 auf 5 Magnete wenn Oszillation Ein ist.
+     * Funktion für den Baustein «Wenn Knopf … gedrückt»
+     * Diese Funktion verändert den Abstand der oszillierenden
+     * Magnete von 3 auf 5 Magnete, aber nur wenn die Oszillation eingeschaltet wurde.
      */
     //% weight=86 blockId=setMagnetabstand block="Oszillations-bereich"
     export function setMagnetabstand() {
@@ -625,24 +626,22 @@ namespace nanoMedForLife {
     }
 
      /**
-     * Funktion für den Baustein «Wenn Knopf … geklickt». 
-     * Diese Funktion wechselt per Knopfdruck die Nord/ Süd- Polarität der Magnetspulen.
-     * Damit kann das Magnet in die Gegenrichtung navigiert werden.
+     * Funktion für den Baustein «Wenn Knopf … gedrückt». 
+     * Diese Funktion wechselt per Knopfdruck die Plus/Minus- Polarität der Elektromagnete.
      * Dies ist beim Labyrinth eine erforderliche Funktion.
      */
-    //% weight=86 blockId=switchPolarity block="wechsle Polarität der Magnetspulen"
+    //% weight=86 blockId=switchPolarity block="wechsle Polarität der Elektromagnete"
     export function switchPolarity() {
         vorzeichen = -vorzeichen
     }
 
     /**
-     * Dieser Baustein muss beim Sender und dem Empfänger “beim Start” gleich gesetzt sein.
-     * Dies definiert die Funkgruppen Nummer.
+     * Dieser Baustein muss beim Sender und dem Empfänger “beim Start” eingesetzt werden und die selbe Nummer aufweisen.
      * Dieser Block ist für den Antrieb des Advancers nötig.
      * Zusätzlich kann die Geschwindigkeit des Advancer Motors gesetzt werden.
      * @param frequency gewünschter Funkkanal
      */
-    //% weight=86 blockId=setRadioGroup block="setze den Funkkanal auf |%frequency|"
+    //% weight=86 blockId=setRadioGroup block="Funkkanal |%frequency|"
     export function setRadioGroup(frequency: number) {
         radioGroup = frequency
         radio.setGroup(radioGroup)
@@ -660,11 +659,11 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Funktion für den Baustein «Wenn Knopf … geklickt».
+     * Funktion für den Baustein «Wenn Knopf … gedrückt».
      * Diese Funktion tauscht Joystick links und rechts.
      * Diese Funktion ist nicht mehr in der Liste, da sie kaum gebraucht wird.
      */
-    //% weight=86 blockId=swapJS block="Funktion der Joysticks tauschen"
+    //% weight=86 blockId=swapJS block="Joysticks R & L tauschen"
     function swapJS() {
         let temp = magnetJoystick
         magnetJoystick = advancerJoystick
@@ -672,11 +671,12 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Handle received number with a callback
+     * Empfänger des per Funk gesendeten Wertes für den Antrieb des Advancers. 
+     * Dem Block muss die Funktion hinzugefügt werden, welche für den Antrieb des Motors zuständig ist.
      * @param optionsOrCallback Optional configuration object or callback function
      * @param callbackOrUndefined Optional callback function
      */
-    //% weight=86 blockId=receivingValues block="empfange Wert für advancerSpeed"
+    //% weight=86 blockId=receivingValues block="Empfängt Werte für:"
     export function onReceivedNumberHandler( callback: Action
     ): void {
         radio.onReceivedNumber(function (advancerSpeed: number) {
@@ -734,11 +734,11 @@ namespace nanoMedForLife {
 
     /**
      * Sendet die Werte von “Auslenkung” (Magnetstärke) und 
-     * “Winkel” (Richtung, bzw Magnetnummer) des Joysticks an 
-     * das magnetische Spielfeld via Kabel.
+     * “Winkel” (Richtung / Magnetnummer) des Joysticks Links an 
+     * das Magnetspielfeld via Kabel.
      * @param magnetJoystick
      */
-    //% weight=86 blockId=setMagneticField block="Elektromagnete mit Joystick steuern"
+    //% weight=86 blockId=setMagneticField block="Magnetspielfeld mit Joystick Links steuern"
     export function setMagneticField() {
         MagneticNavigation.watchdog.reset();
         winkel = handlebit.getAngle(magnetJoystick)
@@ -769,10 +769,10 @@ namespace nanoMedForLife {
     /**
      * Sendet die Werte von der Auslenkung (Magnetstärke) und des 
      * Winkels (je nach Richtung die entsprechende Magnetnummer) 
-     * vom Joystick an den zweiten Micro:bit, welcher den Advancer antreibt.
-     * Dieser microBit muss die selbe Funknummer aufrufen um das Signal zu erhalten.
+     * vom rechten Joystick an den zweiten Micro:bit, welcher den Advancermotor antreibt.
+     * Dieser microBit muss die selbe Funknummer aufweisen, um das Signal zu erhalten.
      */
-    //% weight=86 blockId=sendAdvancerCommand block="Advancer- Joystick"
+    //% weight=86 blockId=sendAdvancerCommand block="Joystick Rechts"
     export function sendAdvancerCommand() {
         let advancerSpeed = handlebit.getSensorValue(handlebit.Direction.DIR_X, advancerJoystick)
         if (advancerSpeed > 2 || advancerSpeed < -2) {
@@ -784,9 +784,9 @@ namespace nanoMedForLife {
 
     /**
      * Dieser Block treibt den Motor des Advancers an, wenn dieser dem Empfänger hinzugefügt wird.
-     * Beachte, dass der "Empfänger" dieselbe Kanal Nummer wie der “Advancer Joystick" Sender aufweisen muss.
+     * Beachte, dass der "Empfänger" dieselbe Kanal Nummer wie “Joystick Rechts" aufweisen muss.
      */
-    //% weight=86 blockId=setAdvancerSpeed block="Antrieb Advancer"
+    //% weight=86 blockId=setAdvancerSpeed block="Antrieb des Advancermotors"
     export function setAdvancerSpeed() {
             motorPowerX = speedFactor*lastReceivedNumber
             if (motorPowerX != 0) {
@@ -798,11 +798,11 @@ namespace nanoMedForLife {
 
     /**
      * Dieser Block kann in «Dauerhaft» oder «Schleife alle 50ms» eingefügt werden.
-     * Optionaler Faktor (Wert zwischen 0.1 - 20 eintragen) um die erwünschte Maximalgeschwindigkeit zu setzen.
+     * Optionaler Faktor (Wert zwischen 0.5 - 20 eintragen) um die erwünschte Maximalgeschwindigkeit zu setzen.
      * Default =1
      *  @param speed
      */
-    //% weight=86 blockId=setAdvancerSpeedFactor block="Advancer Geschwindigkeit |%speed|"
+    //% weight=86 blockId=setAdvancerSpeedFactor block="Geschwindigkeit des Advancers |%speed|"
     export function setAdvancerSpeedFactor(speed: number) {
         speedFactor = speed
     }
