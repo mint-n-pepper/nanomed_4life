@@ -1,7 +1,7 @@
 /*
 gamepad package
 */
-//% weight=10 icon="\uf11b" color=#999999 block="nanomed4life Magnetspielfeld" 
+//% weight=10 icon="\uf11b" color=#999999 block="nanomed 4life Magnetspielfeld" 
 namespace MagneticNavigation {
     const MotorSpeedSet = 0x82
     const PWMFrequenceSet = 0x84
@@ -86,7 +86,7 @@ namespace MagneticNavigation {
      * Die Sicherheitsmassnahme bewirkt, dass nach 5 Minuten Dauerbetrieb das Spielfeld ausschaltet um vor Erhitzen zu schützen.
      */
     //% block="Sicherheits-Timeout ausschalten!"
-    export function sendHeartbeat() {
+    noexport function deactivated sendHeartbeat() {
         console.log("Watchdog timer reset.");
         watchdog.reset();
     }
@@ -106,7 +106,7 @@ namespace MagneticNavigation {
      * Leistungen im Plus-Bereich zwischen 0 < 100 erzeugen einen positiven Magnetismus (rote LEDs).
      * Leistungen mit Minuswerten zwischen 0 < -100 erzeugen einen negativen Magnetismus (grüne LEDs).
      * Das Ausführen dieser Funktion startet den Sicherheits Timer, um die Magnete vor Erhitzen zu schützen- 
-     * die Magnete schalten somit nach 5 Minuten ab. mit 'Selbstabschaltung neu starten' aktiv gehalten werden muss.
+     * die Magnete schalten somit nach 5 Minuten ab.
      * @param index des Elektromagnets
      * @param leistung die der Elektromagnet abgeben soll
      */
@@ -259,7 +259,7 @@ namespace MagneticNavigation {
 /*
 gamepad package
 */
-//% weight=10 icon="\uf11b" color=#777777 block="nanomed4life Controller" 
+//% weight=10 icon="\uf11b" color=#777777 block="nanomed 4life Controller" 
 namespace handlebit {
     export enum Button {
         //% block="B1"
@@ -418,7 +418,7 @@ namespace handlebit {
     }
 
     /**
-     * Führt die eingefügte Funktion aus wenn der Knopf gedrückt wird. Der Controller verfügt über 4 Knöpfe. Gelb, Rot, Controller Links, Controller Rechts.
+     * Führt die eingefügte Funktion aus, wenn der Knopf gedrückt wird. Der Controller verfügt über 4 Knöpfe. B1 (Gelb), B2 (Rot), Joystick Links, Joystick Rechts.
      * @param button the button that needs to be pressed
      * @param body code to run when event is raised
      */
@@ -529,7 +529,7 @@ namespace handlebit {
 
     /**
      * Steuert die Auslenkung des Joysticks und reguliert damit die Magnetstärke.
-     * Die einzugebenden Werte liegen im Bereich -100 bis 100. Minuswerte erzeugen (rot/ Nord) 
+     * Die einzugebenden Werte liegen im Bereich -100 bis 100. Minuswerte erzeugen Nordpolarität (Rot)
      */
     //% blockId=getDeflection block="Auslenkung Joystick |%joystick|"
     export function getDeflection(joystick: Joystick): number {
@@ -593,30 +593,31 @@ namespace nanoMedForLife {
     /**
      * Funktion für den Baustein «Wenn Knopf ... gedrückt» 
      * Ändert die Ansteuerung einzelner Magnete zum Modus mit Gegenmagnet.
-     * Das Gegenmagnet erzeugt ein homogenes Magnetfeld wenn dazu 
-     * die Dauermagnete «booster» ins Spielfeld eingesetzt sind.
+     * Das Gegenmagnet verstärkt das Magnetfeld wenn dazu 
+     * die Dauermagnete «booster» im Spielfeld eingesetzt sind.
      * Dieser Modus ist speziell für die Challenge entwickelt.
      */
-    //% weight=86 blockId=switchWippen block="Modus wechseln"
+    //% weight=86 blockId=switchWippen block="Gegenmagnet ein-/ausschalten"
     export function switchWippen() {
         wippen = 1 - wippen
     }
 
     /**
-     * Wenn in den Baustein «Wenn Knopf … gedrückt» eingefügt schaltet der Modus Oszillieren ein oder aus.
-     * Zusätzlich kann auf einem anderen Knopf die Oszillation von 3 auf 5 Magnete geändert werden
+     * Funktion für den Baustein «Wenn Knopf … gedrückt»
+     * Dieser Modus aktiviert das ein-und ausschalten zusätzlicher benachbarter Elektromagnete, daher Taktbetrieb genannt. 
+     * Siehe auch den Block Taktbetrieb- Bereich um die Navigation weiter zu optimieren.
      */
-    //% weight=86 blockId=switchModus block="Oszillation Ein/Aus"
+    //% weight=86 blockId=switchModus block="Navigation mit Taktbetrieb"
     export function switchModus() {
         modus = 1 - modus
     }
 
     /**
      * Funktion für den Baustein «Wenn Knopf … gedrückt»
-     * Diese Funktion verändert den Abstand der oszillierenden
-     * Magnete von 3 auf 5 Magnete, aber nur wenn die Oszillation eingeschaltet wurde.
+     * Mit dieser Funktion wird der Winkel des Joysticks auf 3 oder 5 Magnete verteilt.
+     * Aber nur wenn "Navigation mit Taktbetrieb" eingeschaltet wurde.
      */
-    //% weight=86 blockId=setMagnetabstand block="Oszillations-bereich"
+    //% weight=86 blockId=setMagnetabstand block="Taktbetrieb- Bereich"
     export function setMagnetabstand() {
         magnetabstand = magnetabstand === 1 ? 2 : 1
         // if (magnetabstand === 1) {
@@ -629,7 +630,6 @@ namespace nanoMedForLife {
      /**
      * Funktion für den Baustein «Wenn Knopf … gedrückt». 
      * Diese Funktion wechselt per Knopfdruck die Plus/Minus- Polarität der Elektromagnete.
-     * Dies ist beim Labyrinth eine erforderliche Funktion.
      */
     //% weight=86 blockId=switchPolarity block="wechsle Polarität der Elektromagnete"
     export function switchPolarity() {
@@ -672,7 +672,7 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Empfängt per Funk die vom Joystick Rechts gesendeten Werte um den Advancers anzutreiben. Achtung- nur seitliche Bewegungen werden ausgeführt.
+     * Empfängt per Funk die vom Joystick Rechts gesendeten Werte um den Advancer anzutreiben. Achtung- nur seitliche Bewegungen werden ausgeführt.
      * Dem Block muss die Funktion hinzugefügt werden, welche für den Antrieb des Motors zuständig ist.
      * @param optionsOrCallback Optional configuration object or callback function
      * @param callbackOrUndefined Optional callback function
@@ -736,7 +736,7 @@ namespace nanoMedForLife {
     /**
      * Sendet die Werte von “Auslenkung” (Magnetstärke) und 
      * “Winkel” (Richtung / Magnetnummer) des linken Joysticks an 
-     * das Magnetspielfeld via Kabel. Optional können weitere Funktionen auf den Knöpfen belegt werden um das Verhalten der Magnete zu ändern.
+     * das Magnetspielfeld via Kabel.
      * @param magnetJoystick
      */
     //% weight=86 blockId=setMagneticField block="Magnetspielfeld mit Joystick Links steuern"
@@ -770,8 +770,8 @@ namespace nanoMedForLife {
     /**
      * Sendet die Werte von der Auslenkung (Magnetstärke) und des 
      * Winkels (je nach Richtung die entsprechende Magnetnummer) 
-     * vom rechten Joystick an den zweiten Micro:bit, welcher den Advancermotor antreibt.
-     * Dieser microBit muss die selbe Funknummer aufweisen, um das Signal zu erhalten.
+     * vom rechten Joystick an den zweiten micro:bit, welcher den Advancermotor antreibt.
+     * Dieser micro:bit muss die selbe Funknummer aufweisen, um das Signal zu erhalten.
      */
     //% weight=86 blockId=sendAdvancerCommand block="Advancermotor mit Joystick Rechts ansteuern"
     export function sendAdvancerCommand() {
@@ -784,8 +784,7 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Dieser Block treibt den Motor des Advancers an, wenn dieser dem Empfängerblock hinzugefügt wird.
-     * Beachte, dass das Progamm des nanomed4life Controllers dieselbe Kanal Nummer wie der auf dem Advancer micro:Bit aufweisen muss.
+     * Dieser Block treibt den Motor des Advancers per Funk an, wenn dieser dem Empfängerblock hinzugefügt wird.
      */
     //% weight=86 blockId=setAdvancerSpeed block="Antrieb des Advancermotors"
     export function setAdvancerSpeed() {
@@ -798,8 +797,8 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Dieser Block kann in «Dauerhaft» oder «Schleife alle 50ms» eingefügt werden.
-     * Optionaler Faktor (Wert zwischen 0.5 - 20 eintragen) um die erwünschte Maximalgeschwindigkeit zu setzen.
+     * Dieser Block kann «beim Start» eingefügt werden.
+     * Dieser Optionale Faktor (Wert zwischen 0.5 - 20 eintragen) steuert die Maximalgeschwindigkeit.
      * Default =1
      *  @param speed
      */
