@@ -556,7 +556,7 @@ namespace handlebit {
 /*
 * Magnetspielfeld und Advancer mit Joysticks steuern
 */
-//% weight=10 icon="\uf11b" color=#333333 block="nanomed4life Challenge" 
+//% weight=10 icon="\uf11b" color=#333333 block="nanomed 4life Challenge" 
 namespace nanoMedForLife {
     let sideBeitrag = -1
     let hauptBeitrag = -1
