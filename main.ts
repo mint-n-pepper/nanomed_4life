@@ -101,19 +101,17 @@ namespace MagneticNavigation {
     }
 
     /**
-     * Setze die Leistung für die Elektromagnete (Index= 1 bis 8).
-     * Ein Alarmton wird ausgegeben wenn kein Wert gesetzt ist.
-     * Leistungen im Plus-Bereich zwischen 0 < 100 erzeugen einen positiven Magnetismus (rote LEDs).
-     * Leistungen mit Minuswerten zwischen 0 < -100 erzeugen einen negativen Magnetismus (grüne LEDs).
-     * Das Ausführen dieser Funktion startet den Sicherheits Timer, um die Magnete vor Erhitzen zu schützen- 
-     * die Magnete schalten somit nach 5 Minuten ab.
+     * Bestimmte welche Elektromagnet-Nummer mit welcher Leistung angesteuert werden soll (Index= 1 bis 8).
+     * Leistungen im Plus-Bereich zwischen 0 bis 100 erzeugen einen positiven Nord-Magnetismus (rote LEDs).
+     * Leistungen mit Minuswerten zwischen -100 bis 0 erzeugen einen negativen Süd Magnetismus (grüne LEDs).
+     * Ein Alarmton wird ausgegeben wenn kein Wert gesetzt ist. Nach 5 Minuten schalten die Magnete ab, LEDs leuchten farbig.
      * @param index des Elektromagnets
      * @param leistung die der Elektromagnet abgeben soll
      */
     //% block="Setze Leistung für Elektromagnet $index auf $leistung"
     //% leistung.min=-100 leistung.max=100
     //% index.min=1 index.max=8
-    //% leistung.defl=0
+    //% leistung.defl=100
     //% index.defl=1
     export function setMagnetPower(
         index?: number,
@@ -529,7 +527,7 @@ namespace handlebit {
 
     /**
      * Steuert die Auslenkung des Joysticks und reguliert damit die Magnetstärke.
-     * Die einzugebenden Werte liegen im Bereich -100 bis 100. Minuswerte erzeugen Nordpolarität (Rot)
+     * Die einzugebenden Werte liegen im Bereich -100 bis 100. Pluswerte erzeugen Nordpolarität (Rot)
      */
     //% blockId=getDeflection block="Auslenkung Joystick |%joystick|"
     export function getDeflection(joystick: Joystick): number {
@@ -605,7 +603,7 @@ namespace nanoMedForLife {
     /**
      * Funktion für den Baustein «Wenn Knopf … gedrückt»
      * Dieser Modus aktiviert das ein-und ausschalten zusätzlicher benachbarter Elektromagnete, daher Taktbetrieb genannt. 
-     * Siehe auch den Block Taktbetrieb- Bereich um die Navigation weiter zu optimieren.
+     * Siehe auch den Block Taktbetrieb-Bereich um die Navigation weiter zu optimieren.
      */
     //% weight=86 blockId=switchModus block="Navigation mit Taktbetrieb"
     export function switchModus() {
@@ -617,7 +615,7 @@ namespace nanoMedForLife {
      * Mit dieser Funktion wird der Winkel des Joysticks auf 3 oder 5 Magnete verteilt.
      * Aber nur wenn "Navigation mit Taktbetrieb" eingeschaltet wurde.
      */
-    //% weight=86 blockId=setMagnetabstand block="Taktbetrieb- Bereich"
+    //% weight=86 blockId=setMagnetabstand block="Taktbetrieb-Bereich"
     export function setMagnetabstand() {
         magnetabstand = magnetabstand === 1 ? 2 : 1
         // if (magnetabstand === 1) {
@@ -637,9 +635,8 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Dieser Baustein muss beim Sender und dem Empfänger “beim Start” eingesetzt werden und die selbe Nummer aufweisen.
-     * Dieser Block ist für den Antrieb des Advancers nötig.
-     * Zusätzlich kann die Geschwindigkeit des Advancer Motors gesetzt werden.
+     * Dieser Baustein muss bei beiden micro:bit's “beim Start” eingesetzt werden und die selbe Nummer aufweisen.
+     * Optional kann die Geschwindigkeit des Advancer Motors gesetzt werden.
      * @param frequency gewünschter Funkkanal
      */
     //% weight=86 blockId=setRadioGroup block="Funkkanal |%frequency|"
@@ -672,8 +669,8 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Empfängt per Funk die vom Joystick Rechts gesendeten Werte um den Advancer anzutreiben. Achtung- nur seitliche Bewegungen werden ausgeführt.
-     * Dem Block muss die Funktion hinzugefügt werden, welche für den Antrieb des Motors zuständig ist.
+     * Der Advancer micro:bit (A) empfängt per Funk die vom Joystick Rechts gesendeten Werte, um den Advancer anzutreiben.
+     * Diesem Block muss die Funktion hinzugefügt werden, welche für den Antrieb des Motors zuständig ist.
      * @param optionsOrCallback Optional configuration object or callback function
      * @param callbackOrUndefined Optional callback function
      */
@@ -768,10 +765,9 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Sendet die Werte von der Auslenkung (Magnetstärke) und des 
-     * Winkels (je nach Richtung die entsprechende Magnetnummer) 
-     * vom rechten Joystick an den zweiten micro:bit, welcher den Advancermotor antreibt.
-     * Dieser micro:bit muss die selbe Funknummer aufweisen, um das Signal zu erhalten.
+     * Die Werte der seitlichen Auslenkung des rechten Joysticks steuern den Advancermotor.
+     * Der micro:bit (A- wie Advancer) empfängt diese Werte per Funk.
+     * Dieser micro:bit (C wie controller) weist die selbe Funknummer auf.
      */
     //% weight=86 blockId=sendAdvancerCommand block="Advancermotor mit Joystick Rechts ansteuern"
     export function sendAdvancerCommand() {
