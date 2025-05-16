@@ -3,12 +3,12 @@
 
 ## Als Erweiterung verwenden
 
-Dieses Repository kann als **Erweiterung** in MakeCode hinzugefügt werden.
+Dieses Repository wird als **Erweiterung** in MakeCode hinzugefügt.
 
 * öffne [https://makecode.microbit.org/](https://makecode.microbit.org/)
 * klicke auf **Neues Projekt**
 * klicke auf **Erweiterungen** unter dem Zahnrad-Menü
-* nach **https://github.com/mint-n-pepper/nanomed_4life** suchen und importieren
+* nach **https://github.com/mint-n-pepper/nanomed_4life.git** suchen und importieren
 
 ## Dieses Projekt bearbeiten
 
