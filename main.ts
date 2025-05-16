@@ -86,7 +86,7 @@ namespace MagneticNavigation {
      * Die Sicherheitsmassnahme bewirkt, dass nach 5 Minuten Dauerbetrieb das Spielfeld ausschaltet um vor Erhitzen zu schützen.
      */
     //% block="Sicherheits-Timeout ausschalten!"
-    noexport function deactivated sendHeartbeat() {
+    function sendHeartbeat() {
         console.log("Watchdog timer reset.");
         watchdog.reset();
     }
