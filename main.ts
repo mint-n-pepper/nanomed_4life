@@ -92,7 +92,7 @@ namespace MagneticNavigation {
     }
 
     /**
-     * Schaltet alle Elektromagnete aus. Diese Funktion dient als Vereichfachung zum  Programmieren.
+     * Schaltet alle Leistungen der Elektromagnete auf 0, dies bewirkt Abschalten der Elektromagnete.
      */
     //% block="Setze Leistung für alle Elektromagnete auf 0."
     export function zeroAllMagnets() {
@@ -101,10 +101,10 @@ namespace MagneticNavigation {
     }
 
     /**
-     * Bestimmte welche Elektromagnet-Nummer mit welcher Leistung angesteuert werden soll (Index= 1 bis 8).
-     * Leistungen im Plus-Bereich zwischen 0 bis 100 erzeugen einen positiven Nord-Magnetismus (rote LEDs).
-     * Leistungen mit Minuswerten zwischen -100 bis 0 erzeugen einen negativen Süd Magnetismus (grüne LEDs).
-     * Ein Alarmton wird ausgegeben wenn kein Wert gesetzt ist. Nach 5 Minuten schalten die Magnete ab, LEDs leuchten farbig.
+     * Dieser Block ermöglicht es, einzelne Elektromagnete anzusteuern (Index= 1 bis 8).
+     * Zwischen 0 bis 100 wird positiver Nord-Magnetismus erzeugt (rote LEDs).
+     * Zwischen -100 bis 0 werden negative Leistungen, also Süd Magnetismus erzeugt (grüne LEDs).
+     * Ein Alarmton wird ausgegeben wenn kein Wert gesetzt ist. Nach 5 Minuten schalten die Magnete als Schutz vor Überhitzung ab, LEDs leuchten farbig.
      * @param index des Elektromagnets
      * @param leistung die der Elektromagnet abgeben soll
      */
@@ -166,8 +166,8 @@ namespace MagneticNavigation {
     }
 
     /**
-     * Sendet die aufgeführten Werte an das Magnetspielfeld, es ist eine Funktion, welche immer ausgeführt werden muss, ansonsten reagieren die Magnete nicht.
-     * Die Funktion kann am Ende des Programms einmalig ausgeführt werden. Es ist jedoch auch möglich dies nach jedem Programmschritt oder Leistungswechsel der Magnete auszuführen. 
+     * Sendet die aufgeführten Werte an das Magnetspielfeld.
+     * Die Funktion soll bei Leistungswechseln oder am Ende des Programms ausgeführt werden, um die gesetzen Leistungen an das Spielfeld zu senden. 
      */
     //% block="Sende alle Leistungswerte zum Magnetspielfeld"
     export function writeAll() {
@@ -427,7 +427,7 @@ namespace handlebit {
 
     /**
      * Liest den Wert des gewünschten Joystick in gewünschter Richtung. 
-     * Die Werte liegen im Bereich -100 bis 100.
+     * Die Werte liegen im Bereich -100 bis +100.
      */
     //% weight=84 blockId=getSensorValue block="|%direction|-Wert von Joystick |%joystick|"
     export function getSensorValue(direction: Direction, joystick: Joystick): number {
