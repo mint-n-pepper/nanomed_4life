@@ -92,7 +92,7 @@ namespace MagneticNavigation {
     }
 
     /**
-     * Schaltet alle Leistungen der Elektromagnete auf 0, dies bewirkt Abschalten der Elektromagnete.
+     * Schaltet alle Leistungen der Elektromagnete auf 0 (Abschalten der Elektromagnete).
      */
     //% block="Setze Leistung für alle Elektromagnete auf 0."
     export function zeroAllMagnets() {
@@ -102,9 +102,9 @@ namespace MagneticNavigation {
 
     /**
      * Dieser Block ermöglicht es, einzelne Elektromagnete anzusteuern (Index= 1 bis 8).
-     * Zwischen 0 bis 100 wird positiver Nord-Magnetismus erzeugt (rote LEDs).
-     * Zwischen -100 bis 0 werden negative Leistungen, also Süd Magnetismus erzeugt (grüne LEDs).
-     * Ein Alarmton wird ausgegeben wenn kein Wert gesetzt ist. Nach 5 Minuten schalten die Magnete als Schutz vor Überhitzung ab, LEDs leuchten farbig.
+     * Zwischen 0 und 100 wird positiver Nord-Magnetismus erzeugt (rote LEDs).
+     * Zwischen -100 und 0 werden negative Leistungen, also Süd-Magnetismus erzeugt (grüne LEDs).
+     * Ein Alarmton wird ausgegeben, wenn kein Wert gesetzt ist. Nach 5 Minuten schalten die Magnete zum Schutz vor Überhitzung ab, LEDs leuchten farbig.
      * @param index des Elektromagnets
      * @param leistung die der Elektromagnet abgeben soll
      */
@@ -167,7 +167,7 @@ namespace MagneticNavigation {
 
     /**
      * Sendet die aufgeführten Werte an das Magnetspielfeld.
-     * Die Funktion soll bei Leistungswechseln oder am Ende des Programms ausgeführt werden, um die gesetzen Leistungen an das Spielfeld zu senden. 
+     * Die Funktion soll bei Leistungswechseln oder am Ende des Programms ausgeführt werden, um die gesetzten Leistungen an das Spielfeld zu senden. 
      */
     //% block="Sende alle Leistungswerte zum Magnetspielfeld"
     export function writeAll() {
@@ -426,7 +426,7 @@ namespace handlebit {
     }
 
     /**
-     * Liest den Wert des gewünschten Joystick in gewünschter Richtung. 
+     * Liest den Wert des gewünschten Joysticks in gewünschter Richtung. 
      * Die Werte liegen im Bereich -100 bis +100.
      */
     //% weight=84 blockId=getSensorValue block="|%direction|-Wert von Joystick |%joystick|"
@@ -494,7 +494,7 @@ namespace handlebit {
     }
     
      /**
-     * Der linke Joystick adressiert die Elektromagnete gemäss Richtung der Auslenkung.
+     * Der linke Joystick adressiert die Elektromagnete gemäss Richtung (Winkel) der Auslenkung.
      * Die Winkel werden dabei durch die 8 Teilkreise aufgeteilt.
      */
     //% blockId=getAngle block="Winkel Joystick |%joystick|"
@@ -527,7 +527,7 @@ namespace handlebit {
 
     /**
      * Steuert die Auslenkung des Joysticks und reguliert damit die Magnetstärke.
-     * Die einzugebenden Werte liegen im Bereich -100 bis 100. Pluswerte erzeugen Nordpolarität (Rot)
+     * Die einzugebenden Werte liegen im Bereich -100 bis +100. Pluswerte erzeugen Nord-Polarität (Rot)
      */
     //% blockId=getDeflection block="Auslenkung Joystick |%joystick|"
     export function getDeflection(joystick: Joystick): number {
@@ -591,8 +591,8 @@ namespace nanoMedForLife {
     /**
      * Funktion für den Baustein «Wenn Knopf ... gedrückt» 
      * Ändert die Ansteuerung einzelner Magnete zum Modus mit Gegenmagnet.
-     * Das Gegenmagnet verstärkt das Magnetfeld wenn dazu 
-     * die Dauermagnete «booster» im Spielfeld eingesetzt sind.
+     * Der gegenüberliegende Magnet verstärkt damit das Magnetfeld, wenn dazu 
+     * die «booster» im Spielfeld eingesetzt sind.
      * Dieser Modus ist speziell für die Challenge entwickelt.
      */
     //% weight=86 blockId=switchWippen block="Gegenmagnet ein-/ausschalten"
@@ -601,9 +601,9 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Funktion für den Baustein «Wenn Knopf … gedrückt»
-     * Dieser Modus aktiviert das ein-und ausschalten zusätzlicher benachbarter Elektromagnete, daher Taktbetrieb genannt. 
-     * Siehe auch den Block Taktbetrieb-Bereich um die Navigation weiter zu optimieren.
+     * Funktion für den Baustein «Wenn Knopf … gedrückt».
+     * Dieser Modus aktiviert das Ein-und Ausschalten zusätzlicher benachbarter Elektromagnete, daher Taktbetrieb genannt. 
+     * Siehe auch Block Taktbetrieb-Bereich, um die Navigation weiter zu optimieren.
      */
     //% weight=86 blockId=switchModus block="Navigation mit Taktbetrieb"
     export function switchModus() {
@@ -612,8 +612,8 @@ namespace nanoMedForLife {
 
     /**
      * Funktion für den Baustein «Wenn Knopf … gedrückt»
-     * Mit dieser Funktion wird der Winkel des Joysticks auf 3 oder 5 Magnete verteilt.
-     * Aber nur wenn "Navigation mit Taktbetrieb" eingeschaltet wurde.
+     * Mit dieser Funktion wird der Winkel des Joysticks auf 3 oder 5 Magnete verteilt,
+     * aber nur wenn "Navigation mit Taktbetrieb" eingeschaltet wurde.
      */
     //% weight=86 blockId=setMagnetabstand block="Taktbetrieb-Bereich"
     export function setMagnetabstand() {
@@ -627,7 +627,7 @@ namespace nanoMedForLife {
 
      /**
      * Funktion für den Baustein «Wenn Knopf … gedrückt». 
-     * Diese Funktion wechselt per Knopfdruck die Plus/Minus- Polarität der Elektromagnete.
+     * Diese Funktion wechselt per Knopfdruck die Plus-/Minus-Polarität der Elektromagnete.
      */
     //% weight=86 blockId=switchPolarity block="wechsle Polarität der Elektromagnete"
     export function switchPolarity() {
@@ -635,7 +635,7 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Dieser Baustein muss bei beiden micro:bit's “beim Start” eingesetzt werden und die selbe Nummer aufweisen.
+     * Dieser Baustein muss bei beiden micro:bits “beim Start” eingesetzt werden und dieselbe Nummer aufweisen.
      * Optional kann die Geschwindigkeit des Advancer Motors gesetzt werden.
      * @param frequency gewünschter Funkkanal
      */
@@ -647,7 +647,7 @@ namespace nanoMedForLife {
     }
 
     /**
-     * Führt eine Aktion aus wenn auf den gewünschten Knopf gedrückt wird.
+     * Führt eine Aktion aus, wenn auf den gewünschten Knopf gedrückt wird.
      * @param button the button that needs to be pressed
      * @param body code to run when event is raised
      */
@@ -674,7 +674,7 @@ namespace nanoMedForLife {
      * @param optionsOrCallback Optional configuration object or callback function
      * @param callbackOrUndefined Optional callback function
      */
-    //% weight=86 blockId=receivingValues block="Empfängt Werte des Joystick rechts:"
+    //% weight=86 blockId=receivingValues block="Empfängt Werte des Joystick Rechts:"
     export function onReceivedNumberHandler( callback: Action
     ): void {
         radio.onReceivedNumber(function (advancerSpeed: number) {
@@ -767,7 +767,7 @@ namespace nanoMedForLife {
     /**
      * Die Werte der seitlichen Auslenkung des rechten Joysticks steuern den Advancermotor.
      * Der micro:bit (A- wie Advancer) empfängt diese Werte per Funk.
-     * Dieser micro:bit (C wie controller) weist die selbe Funknummer auf.
+     * Dieser micro:bit (C wie Controller) weist die selbe Funknummer auf.
      */
     //% weight=86 blockId=sendAdvancerCommand block="Advancermotor mit Joystick Rechts ansteuern"
     export function sendAdvancerCommand() {
@@ -794,7 +794,7 @@ namespace nanoMedForLife {
 
     /**
      * Dieser Block kann «beim Start» eingefügt werden.
-     * Dieser Optionale Faktor (Wert zwischen 0.5 - 20 eintragen) steuert die Maximalgeschwindigkeit.
+     * Dieser Faktor (Wert zwischen 0.5 - 20 eintragen) steuert die Maximalgeschwindigkeit.
      * Default =1
      *  @param speed
      */
